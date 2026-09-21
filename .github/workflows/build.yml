@@ -1,0 +1,13 @@
+name: Build and test
+on: [push, pull_request]
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - run: dotnet build AdbFileManager.sln --configuration Release
+      - run: dotnet build AdbFileManager/AdbFileManager.csproj --configuration Release -p:Platform=x64
+      - run: dotnet test tests/AdbFileManager.Tests/AdbFileManager.Tests.csproj --configuration Release --no-build

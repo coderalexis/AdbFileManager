@@ -347,4 +347,46 @@ Fecha: {2}</value>
     <value>Después de reiniciar, el teléfono está bloqueado y ADB no puede acceder a los archivos. Sin embargo, puede que no sea posible desbloquearlo cuando la pantalla está rota.
 Esta herramienta puede intentar desbloquear el teléfono para que pueda hacer una copia de seguridad de sus fotos.</value>
   </data>
+  <data name="copy_cancel_hint" xml:space="preserve">
+    <value>Cerrar cancela. Puede quedar un archivo incompleto.</value>
+  </data>
+  <data name="settings_progressUpdateInterval" xml:space="preserve">
+    <value>Intervalo de progreso</value>
+  </data>
+  <data name="queue_title" xml:space="preserve"><value>Transferencias</value></data>
+  <data name="queue_conflict" xml:space="preserve"><value>El destino ya existe</value></data>
+  <data name="queue_fileConflict" xml:space="preserve"><value>Elige qué hacer con el archivo existente.</value></data>
+  <data name="queue_folderConflict" xml:space="preserve"><value>Para carpetas o tipos distintos, omite o conserva ambos para mantener el contenido existente.</value></data>
+  <data name="queue_applyBatch" xml:space="preserve"><value>Aplicar esta decisión a los conflictos de este lote</value></data>
+  <data name="queue_Ask" xml:space="preserve"><value>Preguntar</value></data>
+  <data name="queue_Replace" xml:space="preserve"><value>Reemplazar</value></data>
+  <data name="queue_Skip" xml:space="preserve"><value>Omitir</value></data>
+  <data name="queue_KeepBoth" xml:space="preserve"><value>Conservar ambos</value></data>
+  <data name="queue_hint" xml:space="preserve"><value>Puedes añadir más transferencias desde la ventana principal. Cerrar esta ventana oculta la cola.</value></data>
+  <data name="queue_resume" xml:space="preserve"><value>Iniciar / Continuar</value></data>
+  <data name="queue_pause" xml:space="preserve"><value>Pausar cola</value></data>
+  <data name="queue_cancelCurrent" xml:space="preserve"><value>Cancelar actual</value></data>
+  <data name="queue_retry" xml:space="preserve"><value>Reintentar fallidos / cancelados</value></data>
+  <data name="queue_clear" xml:space="preserve"><value>Limpiar completados</value></data>
+  <data name="queue_export" xml:space="preserve"><value>Exportar resumen</value></data>
+  <data name="queue_file" xml:space="preserve"><value>Nombre</value></data>
+  <data name="queue_direction" xml:space="preserve"><value>Dirección</value></data>
+  <data name="queue_device" xml:space="preserve"><value>Dispositivo</value></data>
+  <data name="queue_destination" xml:space="preserve"><value>Destino</value></data>
+  <data name="queue_state" xml:space="preserve"><value>Estado</value></data>
+  <data name="queue_attempts" xml:space="preserve"><value>Intentos</value></data>
+  <data name="queue_progress" xml:space="preserve"><value>Progreso</value></data>
+  <data name="queue_Pending" xml:space="preserve"><value>Pendiente</value></data>
+  <data name="queue_Running" xml:space="preserve"><value>Copiando</value></data>
+  <data name="queue_Retrying" xml:space="preserve"><value>Reintentando</value></data>
+  <data name="queue_Completed" xml:space="preserve"><value>Completado</value></data>
+  <data name="queue_Failed" xml:space="preserve"><value>Fallido</value></data>
+  <data name="queue_Skipped" xml:space="preserve"><value>Omitido</value></data>
+  <data name="queue_Cancelled" xml:space="preserve"><value>Cancelado</value></data>
+  <data name="queue_active" xml:space="preserve"><value>Cola en marcha</value></data>
+  <data name="queue_stopped" xml:space="preserve"><value>Cola detenida</value></data>
+  <data name="queue_summary" xml:space="preserve"><value>{0} completados · {1} fallidos · {2} omitidos · {3} cancelados · {4} pendientes</value></data>
+  <data name="queue_storageError" xml:space="preserve"><value>No se pudo guardar o recuperar la cola: </value></data>
+  <data name="queue_restored" xml:space="preserve"><value>Se recuperaron las transferencias guardadas. Abre Transferencias para continuar o reintentar.</value></data>
+  <data name="queue_adbError" xml:space="preserve"><value>ADB no disponible</value></data>
 </root>

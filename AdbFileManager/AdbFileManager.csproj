@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -10,7 +10,8 @@
     <Platforms>AnyCPU;x64</Platforms>
     <SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
     <StartupObject></StartupObject>
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget Condition="'$(Platform)' != 'x64'">x86</PlatformTarget>
+    <PlatformTarget Condition="'$(Platform)' == 'x64'">x64</PlatformTarget>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>
 
@@ -120,14 +121,17 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="libwinpthread-1.dll;NOTICE.txt;source.properties">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="adb.exe">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="AdbWinApi.dll">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="AdbWinUsbApi.dll">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="iconsW11\Archive.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -355,7 +359,10 @@
   </ItemGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="rm &quot;$(ProjectDir)\CurrentCommit.txt&quot;&#xD;&#xA;git rev-parse --short HEAD &gt; &quot;$(ProjectDir)\CurrentCommit.txt&quot;" />
+    <Exec Command="git rev-parse --short HEAD" WorkingDirectory="$(ProjectDir)" ConsoleToMSBuild="true" StandardOutputImportance="Low">
+      <Output TaskParameter="ConsoleOutput" PropertyName="CurrentGitCommit" />
+    </Exec>
+    <WriteLinesToFile File="$(ProjectDir)CurrentCommit.txt" Lines="$(CurrentGitCommit)" Overwrite="true" WriteOnlyWhenDifferent="true" />
   </Target>
 
 </Project>

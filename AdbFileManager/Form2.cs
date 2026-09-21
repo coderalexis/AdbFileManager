@@ -15,12 +15,14 @@ using Microsoft.WindowsAPICodePack.Taskbar;
 
 namespace AdbFileManager {
 	public partial class Form2 : Form {
-		public Form2() {
+		public Form2() : this(false) { }
+
+		public Form2(bool cancellable) {
 			InitializeComponent();
 			TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Normal);
 
 			ResourceManager rm = new ResourceManager("AdbFileManager.strings", Assembly.GetExecutingAssembly());
-			label_freezewarn.Text = rm.GetString("copy_freeze_warn");
+			label_freezewarn.Text = rm.GetString(cancellable ? "copy_cancel_hint" : "copy_freeze_warn");
 		}
 		public void Update(int current, int max, string source, string dest, string _filename, float percentage = -1) {
 			Console.WriteLine($"cur: {current} max: {max} perc: {percentage}");
@@ -32,7 +34,8 @@ namespace AdbFileManager {
 
 
 			filename.Text = _filename;
-			progress.Text = $"{percentage}% {current}/{max}";
+			progress.Text = percentage >= 0 ? $"{percentage:F1}% {current}/{max}" : $"{current}/{max}";
+			progressBar1.Style = percentage >= 0 ? ProgressBarStyle.Blocks : ProgressBarStyle.Marquee;
 
 			if(percentage >= 0) {
 				progressBar1.Maximum = 10000;
@@ -51,7 +54,7 @@ namespace AdbFileManager {
 				TaskbarManager.Instance.SetProgressValue(taskbarValue, 10000);
 			}
 			this.Invalidate();
-			this.Refresh();
+			// Let the message loop paint without forcing synchronous redraws.
 		}
 		public void delete() {
 			TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress);

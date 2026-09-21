@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -34,12 +34,11 @@ namespace AdbFileManager {
 			TryUnlock();
 		}
 		public void TryUnlock() {
-			string command = $"adb shell input text {textBox1.Text} && adb shell input keyevent 66";
-			Form1.adb(command);
+			Form1.adb("shell", "input text " + AdbClient.QuoteShell(textBox1.Text) + " && input keyevent 66");
 			DeviceList();
 		}
 		public void DeviceList() {
-			richTextBox2.Text = Form1.adb("adb devices").TrimEnd();
+			richTextBox2.Text = Form1.adb("devices").TrimEnd();
 			if(richTextBox2.Text.Contains("unauthorized") || richTextBox2.Text.Split('\n').Length < 2) {
 				pictureBox1.Image = Properties.Resources.lockedShadow;
 			}

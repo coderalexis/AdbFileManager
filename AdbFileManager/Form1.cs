@@ -1,4 +1,4 @@
-﻿//ADB File Manager
+//ADB File Manager
 //Originally created by T0biasCZe in 2023
 //You can use this program comercially, just dont redistribute it without my permission
 //If you fork thís, please give me credit
@@ -94,6 +94,7 @@ namespace AdbFileManager {
                 string versionn = $"{AdbFileManager.Properties.Resources.CurrentCommit.Trim()} 06.07.2025";
                 label_version.Text = versionn;
                 Console.WriteLine(versionn);
+                InitializeTransfers();
 
             }
             catch (Exception ex) {
@@ -112,48 +113,14 @@ namespace AdbFileManager {
             }
         }
 
-        public static string adb(string command) {
-            Process[] adb = Process.GetProcessesByName("adb");
-            if (adb.Length == 0) {
-                Console.WriteLine("adb.exe is not running, this may take a while");
-                var dt = Form1._Form1.dataGridView_soubory.DataSource as DataTable;
-                string[] strings = rm.GetString("adbStartup").Split("\\n");
-                dt.Rows.Add(new Icon(@"icons\file.ico"), strings[0], 0, DateTime.UnixEpoch);
-                dt.Rows.Add(new Icon(@"icons\file.ico"), strings[1], 0, DateTime.UnixEpoch);
-                Application.DoEvents();
+        public static string adb(params string[] arguments) {
+            try {
+                string? device = arguments[0] is "devices" or "version" or "connect" or "pair"
+                    ? null : selectedDevice?.adbId;
+                var result = AdbClient.Default.ExecuteAsync(arguments, device).GetAwaiter().GetResult();
+                return result.CombinedOutput;
             }
-
-            if (selectedDevice != null) {
-                Console.WriteLine("Selected device is not null, using it in adb command: " + selectedDevice.adbId);
-                //makes adb use the selected device
-                command = command.Replace("adb ", $"adb -s {selectedDevice.adbId} ");
-                Console.WriteLine("adb command after replacing:\n" + command);
-            }
-
-
-            Process process = new Process();
-            process.StartInfo.CreateNoWindow = true;
-            process.StartInfo.FileName = "cmd.exe";
-            process.StartInfo.Arguments = "/c chcp 65001";
-            process.StartInfo.RedirectStandardOutput = true;
-            process.StartInfo.UseShellExecute = false;
-            Cursor.Current = Cursors.WaitCursor;
-            process.Start();
-            process.WaitForExit();
-
-            process.StartInfo.Arguments = "/c " + command;
-            process.Start();
-            string output = process.StandardOutput.ReadToEnd();
-
-            Task handle = process.WaitForExitAsync();
-
-            while (!handle.IsCompleted) {
-                Application.DoEvents();
-            }
-            Application.DoEvents();
-
-            Cursor.Current = Cursors.Default;
-            return output;
+            catch (Exception ex) { return "ADB error: " + ex.Message; }
         }
         private void verticalLabel1_Click(object sender, EventArgs e) {
             Console.WriteLine("verticalLabel1_Click()");
@@ -191,14 +158,14 @@ namespace AdbFileManager {
             }
         }
 
-        private void dataGridView1_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e) {
+        private async void dataGridView1_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e) {
             Console.WriteLine("CellMouseDoubleClick()");
             if (e.RowIndex >= 0) {
                 string name = dataGridView_soubory.Rows[e.RowIndex].Cells[1].Value.ToString();
                 string size = dataGridView_soubory.Rows[e.RowIndex].Cells[2].Value.ToString();
                 string date = dataGridView_soubory.Rows[e.RowIndex].Cells[3].Value.ToString();
                 string permissions = dataGridView_soubory.Rows[e.RowIndex].Cells[4].Value.ToString();
-                if (!Functions.isFolder(permissions, SettingsManager.settings.useCompatibilityMode)) {
+                if (!DirectoryEntry.IsDirectory(permissions)) {
                     if (SettingsManager.settings.previewMediaFiles) {
                         if (Functions.videoExtensions.Any(x => name.EndsWith(x, StringComparison.OrdinalIgnoreCase)) || Functions.imageExtensions.Any(x => name.EndsWith(x, StringComparison.OrdinalIgnoreCase)) || Functions.audioExtensions.Any(x => name.EndsWith(x, StringComparison.OrdinalIgnoreCase))) {
                             //copy file to temp folder
@@ -209,22 +176,13 @@ namespace AdbFileManager {
                                 Directory.CreateDirectory(tempPath);
                                 temp_folder_created = true;
                             }
-                            string command = $"adb pull \"{sourcePath}\" \"{destinationPath}\"";
-                            Process process = new Process();
-                            process.StartInfo.FileName = "cmd.exe";
-                            process.StartInfo.Arguments = "/c " + command;
-                            process.Start();
+                            try {
+                                var arguments = AdbClient.TargetArguments(new[] { "pull", sourcePath, destinationPath }, selectedDevice?.adbId);
+                                await AdbClient.Default.CopyAsync(arguments, null, CancellationToken.None);
+                                Process.Start(new ProcessStartInfo(destinationPath) { UseShellExecute = true });
+                            }
+                            catch (Exception ex) { MessageBox.Show(this, ex.Message, rm.GetString("error")); }
 
-                            var handle = GetConsoleWindow();
-                            ShowWindow(handle, SW_SHOW);
-                            process.WaitForExit();
-
-                            Process file_opener = new Process();
-                            file_opener.StartInfo.FileName = "explorer.exe";
-                            file_opener.StartInfo.Arguments = "\"" + destinationPath + "\"";
-                            file_opener.Start();
-
-                            ShowWindow(handle, console_shown ? 5 : 0);
                         }
 
                     }
@@ -232,269 +190,21 @@ namespace AdbFileManager {
 
                 }
                 else {
-                    directoryPath = directoryPath + name + "/";
-                    cur_path_modifyInternal = true;
-                    cur_path.Text = directoryPath;
-                    cur_path_modifyInternal = false;
-                    //MessageBox.Show(directoryPath);
-                    dataGridView_soubory.DataSource = Functions.getDir(directoryPath, SettingsManager.settings.useCompatibilityMode, SettingsManager.settings.useFastCompatibility);
+                    NavigateToDirectory(TransferCommand.RemotePath(directoryPath, name) + "/");
                 }
             }
         }
-        bool copying = false;
-        private void android2pc_Click(object sender, EventArgs e) {
-            string destinationFolder = explorerBrowser1.NavigationLog.CurrentLocation.ParsingName;
-
-            if (string.IsNullOrEmpty(destinationFolder)) return;
-
-            if (copying) {
-                MessageBox.Show(rm.GetString("copy_in_progress"), rm.GetString("copy_in_progress_title"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            List<File> files = new List<File>();
+        private async void android2pc_Click(object sender, EventArgs e) {
+            string? destination = explorerBrowser1.NavigationLog.CurrentLocation?.ParsingName;
+            if (string.IsNullOrWhiteSpace(destination)) return;
+            var sources = new List<(string Source, bool IsDirectory)>();
             foreach (DataGridViewRow row in dataGridView_soubory.SelectedRows) {
-                string name = row.Cells[1].Value.ToString();
-                string size = row.Cells[2].Value.ToString();
-                string datee = row.Cells[3].Value.ToString();
-                string permissions = row.Cells[4].Value.ToString();
-                bool isDirectory = Functions.isFolder(permissions, SettingsManager.settings.useCompatibilityMode);
-                files.Add(new File(name, size, datee, permissions, isDirectory));
+                string? name = row.Cells[1].Value?.ToString();
+                string? permissions = row.Cells[4].Value?.ToString();
+                if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(permissions)) continue;
+                sources.Add((TransferCommand.RemotePath(directoryPath, name), DirectoryEntry.IsDirectory(permissions)));
             }
-
-            if (SettingsManager.settings.useLegacyCopy) {
-                Console.WriteLine("Copying using legacy broken code");
-                if (SettingsManager.settings.unwrapFilesLegacy) {
-                    Console.WriteLine("with even more broken unwrap folders :|");
-                    //checkBox_unwrapfolders.Checked = true;
-                }
-                else {
-                    //checkBox_unwrapfolders.Checked = false;
-                }
-                copyFilesLegacy(files, destinationFolder);
-                return;
-            }
-            else {
-                Console.WriteLine("Copying using new async code that shouldnt be broken...");
-                //copyFilesAsync(files, destinationFolder);
-                List<string> filesConverted = files.Select(f => f.name).ToList();
-                _ = copyFilesAsync(filesConverted, directoryPath, destinationFolder, true);
-            }
-        }
-
-
-        public void UpdateProgressBar(Form progressBar, int processedFiles, int totalFiles, string directoryPath, string destinationFolder, string filename, float totalPercent, float filePercent) {
-            if (progressBar is Form2New pbar) {
-                pbar.Update(processedFiles, totalFiles, directoryPath, destinationFolder, filename, totalPercent, filePercent);
-            }
-            else if (progressBar is Form2 pbarOld) {
-                pbarOld.Update(processedFiles, totalFiles, directoryPath, destinationFolder, filename, totalPercent);
-            }
-        }
-        public async Task copyFilesAsync(List<string> fileNames, string sourceDir, string destDir, bool fromAndroid) {
-            string dateArg = SettingsManager.settings.keepFileModificationDate ? " -a " : "";
-            string progressArg = " -p";
-
-            int totalFiles = fileNames.Count;
-            int processedFiles = 0;
-
-            Form progressbar = null;
-            Console.WriteLine($"files: {fileNames.Count} two pb: {SettingsManager.settings.ShowTwoProgressBars}");
-            if (fileNames.Count > 1 && SettingsManager.settings.ShowTwoProgressBars) {
-                progressbar = new Form2New();
-            }
-            else {
-                progressbar = new Form2();
-            }
-            progressbar.Show();
-            progressbar.BringToFront();
-            progressbar.Activate();
-            progressbar.Focus();
-
-            copying = true;
-
-            // Start persistent pipe server once
-            AdbFileManager.AdbProgressRunner.StartPipeServer();
-
-            // Subscribe to progress events
-            AdbFileManager.AdbProgressRunner.OnProgressReceived = async filePercent => {
-                Console.WriteLine("PROGRESS: " + filePercent);
-                float totalPercent = (processedFiles * 100f / totalFiles)
-                                   + (filePercent * (1f / totalFiles));
-
-                UpdateProgressBar(
-                    progressbar,
-                    processedFiles,
-                    totalFiles,
-                    sourceDir,
-                    destDir,
-                    fileNames[processedFiles],
-                    totalPercent,
-                    filePercent
-                );
-
-                await Task.CompletedTask;
-            };
-
-            string adbPath = Path.Combine(AppContext.BaseDirectory, "adb.exe");
-
-            foreach (var fileName in fileNames) {
-                string sourceFile;
-                string destinationFile;
-                string adbCommand;
-
-                if (fromAndroid) {
-                    sourceFile = Path.Combine(sourceDir, fileName);
-                    destinationFile = Path.Combine(destDir, fileName).Replace('\\', '/');
-                    adbCommand = "pull";
-                }
-                else {
-                    sourceFile = Path.Combine(sourceDir, fileName);
-                    destinationFile = Path.Combine(destDir, fileName);
-                    adbCommand = "push";
-                }
-
-                // Ensure destination directory exists (only for PC side when pulling from Android)
-                if (fromAndroid) {
-                    string finalDirectory = Path.GetDirectoryName(destinationFile)!;
-                    if (!Directory.Exists(finalDirectory))
-                        Directory.CreateDirectory(finalDirectory);
-                }
-
-                string deviceArg = "";
-                if (selectedDevice != null && fromAndroid) {
-                    deviceArg = $"-s {selectedDevice.adbId} ";
-                    Console.WriteLine($"Using selected device in adb {adbCommand}: " + selectedDevice.adbId);
-                }
-
-                // Build the adb command for this file
-                string command = $"{deviceArg}{adbCommand} {dateArg}{progressArg} \"{sourceFile}\" \"{destinationFile}\"";
-                Console.WriteLine($"[ASYNC COPY] {command}");
-
-                UpdateProgressBar(
-                    progressbar,
-                    processedFiles,
-                    totalFiles,
-                    sourceDir,
-                    destDir,
-                    fileName,
-                    processedFiles * 100 / totalFiles,
-                    0f
-                );
-
-                // Run adb with injection & progress capture
-                await AdbFileManager.AdbProgressRunner.RunAsync(adbPath, command);
-                Console.WriteLine("Finished awaiting adb command");
-
-                processedFiles++;
-
-                if (processedFiles == totalFiles) break;
-                UpdateProgressBar(
-                    progressbar,
-                    processedFiles,
-                    totalFiles,
-                    sourceDir,
-                    destDir,
-                    fileNames[processedFiles],
-                    processedFiles * 100 / totalFiles,
-                    100f
-                );
-            }
-
-            if (progressbar is Form2New pbarNew) {
-                Console.WriteLine("closing 2 bar progress bar");
-                pbarNew.delete();
-            }
-            else if (progressbar is Form2 pbarOld) {
-                Console.WriteLine("closing 1 bar progress bar");
-                pbarOld.delete();
-            }
-            else {
-                Console.WriteLine("Error bad progressbar type");
-            }
-
-            copying = false;
-        }
-
-
-
-        public void copyFilesLegacy(List<File> files, string destinationFolder) {
-            string date = SettingsManager.settings.keepFileModificationDate? " -a " : "";
-
-            // 🪄 Optional unwrap folders here
-            //if(checkBox_unwrapfolders.Checked) {
-            if (SettingsManager.settings.unwrapFilesLegacy) {
-                ProgressBarMarquee pgm = new ProgressBarMarquee();
-                ResourceManager rm = new ResourceManager("AdbFileManager.strings", Assembly.GetExecutingAssembly());
-                pgm.set(rm.GetString("unwrap_wait"), rm.GetString("unwrap_wait_title"));
-                pgm.Show(); pgm.BringToFront(); pgm.Activate(); pgm.Focus();
-
-            restartUnwrap:
-                for (int i = 0; i < files.Count; i++) {
-                    pgm.redraw();
-                    File file = files[i];
-                    if (Functions.isFolder(file, SettingsManager.settings.useCompatibilityMode)) {
-                        Console.WriteLine("Unwrapping folder: " + file.name);
-                        DataTable newfiles_table = Functions.getDir(directoryPath + file.name, SettingsManager.settings.useCompatibilityMode, SettingsManager.settings.useFastCompatibility);
-
-                        files.Remove(file);
-                        List<File> newfiles = new List<File>();
-                        foreach (DataRow row in newfiles_table.Rows) {
-                            string name = row.ItemArray[1].ToString();
-                            string size = row.ItemArray[2].ToString();
-                            string datee = row.ItemArray[3].ToString();
-                            string permissions = row.ItemArray[4].ToString();
-                            bool isDirectory = Functions.isFolder(permissions, SettingsManager.settings.useCompatibilityMode);
-                            newfiles.Add(new File(file.name + "/" + name, size, datee, permissions, isDirectory));
-                            pgm.redraw();
-                        }
-
-                        files.AddRange(newfiles);
-
-                        if (pgm.cancel) {
-                            pgm.delete();
-                            copying = false;
-                            return;
-                        }
-
-                        goto restartUnwrap;
-                    }
-                }
-
-                pgm.delete();
-            }
-
-            // 📥 Perform the actual copy
-            int filecount = files.Count;
-            int copied = 0;
-
-            Form2 progressbar = new Form2();
-            progressbar.Show();
-            progressbar.BringToFront();
-            progressbar.Activate();
-            progressbar.Focus();
-            copying = true;
-
-            foreach (File file in files) {
-                string sourcefile = directoryPath + file.name;
-                string destinationFile = $"\"{destinationFolder.Replace('\\', '/')}/{file.name}\"";
-                string final_directory = Path.GetDirectoryName(destinationFile).Replace("\"", "");
-
-                if (!Directory.Exists(final_directory)) {
-                    Console.WriteLine("Creating directory: " + final_directory);
-                    Directory.CreateDirectory(final_directory);
-                }
-
-                string command = $"adb pull {date} \"{sourcefile}\" {Functions.FixWindowsPath(destinationFile)}";
-                Console.WriteLine(command);
-
-                progressbar.Update(copied, filecount, directoryPath, destinationFolder, file.name);
-                Console.WriteLine(adb(command));
-                copied++;
-            }
-
-            progressbar.delete();
-            copying = false;
+            await QueueTransfersAsync(sources, destination, true);
         }
 
         private void dataGridView1_ColumnHeaderMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e) {
@@ -507,6 +217,7 @@ namespace AdbFileManager {
         private void dataGridView1_KeyDown(object sender, KeyEventArgs e) {
             Console.WriteLine("Key pressed in datagrid: " + e.KeyValue);
             if (e.KeyCode == Keys.Enter) {
+                e.SuppressKeyPress = true;
                 clickedFolder();
             }
             else if (e.KeyCode == Keys.Back) {
@@ -523,46 +234,34 @@ namespace AdbFileManager {
             }
         }
         void clickedFolder() {
-            Console.WriteLine("clickedFolder();");
-            int rowIndex = dataGridView_soubory.CurrentCell.RowIndex;
-            if (rowIndex >= 0) {
-                string name = dataGridView_soubory.Rows[rowIndex].Cells[1].Value.ToString();
-                string size = dataGridView_soubory.Rows[rowIndex].Cells[2].Value.ToString();
-                string date = dataGridView_soubory.Rows[rowIndex].Cells[3].Value.ToString();
-                if (name.Contains(".")) {
-                    MessageBox.Show(string.Format(AdbFileManager.strings.fileInfo, name, size, date));
-                }
-                else {
-                    directoryPath = directoryPath + name + "/";
-                    cur_path.Text = directoryPath;
-                    //MessageBox.Show(directoryPath);
-                    dataGridView_soubory.DataSource = Functions.getDir(directoryPath, SettingsManager.settings.useCompatibilityMode, SettingsManager.settings.useFastCompatibility);
-                }
+            int rowIndex = dataGridView_soubory.CurrentCell?.RowIndex ?? -1;
+            if (rowIndex < 0 || dataGridView_soubory.Rows[rowIndex].IsNewRow) return;
+            var row = dataGridView_soubory.Rows[rowIndex];
+            string? name = row.Cells[1].Value?.ToString();
+            string? permissions = row.Cells[4].Value?.ToString();
+            if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(permissions)) return;
+            if (!DirectoryEntry.IsDirectory(permissions)) {
+                MessageBox.Show(string.Format(AdbFileManager.strings.fileInfo,
+                    name, row.Cells[2].Value, row.Cells[3].Value));
+                return;
             }
+            NavigateToDirectory(TransferCommand.RemotePath(directoryPath, name) + "/");
+        }
+
+        private void NavigateToDirectory(string path) {
+            directoryPath = path;
+            cur_path_modifyInternal = true;
+            try { cur_path.Text = directoryPath; }
+            finally { cur_path_modifyInternal = false; }
+            dataGridView_soubory.DataSource = Functions.getDir(directoryPath,
+                SettingsManager.settings.useCompatibilityMode, SettingsManager.settings.useFastCompatibility);
         }
 
         void goUpDirectory() {
-            Console.WriteLine("goUpDirectory();");
-            if (directoryPath.EndsWith("/")) {
-                int length = directoryPath.Length - 1;
-                int lastIndex = directoryPath.Substring(0, length - 1).LastIndexOf("/");
-                // Check if current directory is already root ("/")
-                if (lastIndex < 0) return;
-
-                directoryPath = directoryPath.Substring(0, lastIndex + 1);
-            }
-            else {
-                int lastIndex = directoryPath.LastIndexOf("/");
-                // Check if current directory is already root ("/")
-                if (lastIndex < 0) return;
-
-                directoryPath = directoryPath.Substring(0, lastIndex + 1);
-            }
-            cur_path_modifyInternal = true;
-            cur_path.Text = directoryPath;
-            cur_path_modifyInternal = false;
-            dataGridView_soubory.DataSource = Functions.getDir(directoryPath, SettingsManager.settings.useCompatibilityMode, SettingsManager.settings.useFastCompatibility);
+            string? parent = DirectoryEntry.ParentPath(directoryPath);
+            if (parent != null) NavigateToDirectory(parent);
         }
+
         public bool multipleDevicesDetection() {
             if (foundDevices.Count > 1 && selectedDevice == null) {
                 Console.WriteLine("Multiple devices detected, showing message in datagridview");
@@ -618,44 +317,10 @@ namespace AdbFileManager {
 
         }
 
-        private void pc2android_Click(object sender, EventArgs e) {
-            var items = explorerBrowser1.SelectedItems.ToArray();
-            string date = SettingsManager.settings.keepFileModificationDate ? " -a " : "";
-
-            if (SettingsManager.settings.useLegacyCopy) {
-                int filecount = items.Count();
-                int copied = 0;
-                Form2 progressbar = new Form2();
-                progressbar.Show();
-                //try to make the progressbar get shown
-                progressbar.BringToFront();
-                progressbar.Activate();
-                progressbar.Focus();
-                copying = true;
-                foreach (ShellObject item in items) {
-                    string sourcefile = item.ParsingName;
-                    string command = $"adb push {date} \"{sourcefile}\" \"{Functions.FixWindowsPath(directoryPath)}\"";
-                    Console.WriteLine(command);
-                    progressbar.Update(copied, filecount, explorer_path.Text, directoryPath, sourcefile);
-                    Console.WriteLine(adb(command));
-                    copied++;
-                }
-                progressbar.Close();
-                copying = false;
-            }
-            else {
-                List<string> files = new List<string>();
-                string sourceDir = explorerBrowser1.NavigationLog.CurrentLocation.ParsingName;
-
-                foreach (ShellObject item in items) {
-                    string fileName = Path.GetFileName(item.ParsingName);
-                    files.Add(fileName);
-                }
-                Console.WriteLine("PC to Android copy using async copying");
-                Console.WriteLine("explorer current location: " + sourceDir);
-                Console.WriteLine("android directory path: " + directoryPath);
-                _ = copyFilesAsync(files, sourceDir, directoryPath, false);
-            }
+        private async void pc2android_Click(object sender, EventArgs e) {
+            var sources = explorerBrowser1.SelectedItems
+                .Select(item => (Source: item.ParsingName, IsDirectory: Directory.Exists(item.ParsingName))).ToList();
+            await QueueTransfersAsync(sources, directoryPath, false);
         }
 
         bool cur_path_modifyInternal = false;
@@ -799,6 +464,14 @@ namespace AdbFileManager {
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e) {
+            if (transferQueue?.IsRunning == true) {
+                e.Cancel = true;
+                closeAfterQueue = true;
+                transferQueue.Pause();
+                return;
+            }
+            if (queueWindow != null) queueWindow.AllowClose = true;
+            SaveAndRefreshQueue();
             //show console
             var handle = GetConsoleWindow();
             ShowWindow(handle, SW_SHOW);
@@ -806,17 +479,7 @@ namespace AdbFileManager {
             Console.ForegroundColor = ConsoleColor.White;
 
             Console.WriteLine("Closing begin");
-            //kill the process adb.exe if it's running
-            Process[] adb = Process.GetProcessesByName("adb.exe");
-            foreach (Process process in adb) {
-                Console.WriteLine("killing adb...");
-                process.Kill();
-            }
-            adb = Process.GetProcessesByName("adb");
-            foreach (Process process in adb) {
-                Console.WriteLine("killing adb...");
-                process.Kill();
-            }
+            // The ADB server is shared with other applications; leave it running.
 
             if (Directory.Exists(tempPath)) {
                 Console.WriteLine("deleting temp directory...");
@@ -1020,9 +683,7 @@ namespace AdbFileManager {
             DialogResult result = directoryNameForm.ShowDialog();
             if (result == DialogResult.OK) {
                 string directoryName = dirName.Text;
-                string command = $"adb shell mkdir \"{directoryPath}/{directoryName}\"";
-                Console.WriteLine(command);
-                string output = adb(command);
+                string output = adb("shell", "mkdir " + AdbClient.QuoteShell(TransferCommand.RemotePath(directoryPath, directoryName)));
                 Console.WriteLine(output);
                 dataGridView_soubory.DataSource = Functions.getDir(directoryPath, SettingsManager.settings.useCompatibilityMode, SettingsManager.settings.useFastCompatibility);
             }
@@ -1081,9 +742,7 @@ namespace AdbFileManager {
         bool modifyingComboBox = false; //to prevent infinite loop when refreshing devices list
         public void refreshDevicesList() {
             Console.WriteLine("Refreshing devices list...");
-            string command = "adb devices -l";
-            Console.WriteLine(command);
-            string output = adb(command);
+            string output = adb("devices", "-l");
             Console.WriteLine(output);
             string[] lines = output.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
             lines = lines.Skip(1).Where(line => !string.IsNullOrWhiteSpace(line)).ToArray();
@@ -1226,9 +885,7 @@ namespace AdbFileManager {
 
 			// Retrieve a list of files in the specified directory
 
-			string command = $"adb shell ls -lL \"'{directoryPath}'\"";
-			Console.WriteLine(command);
-			string output = Form1.adb(command);
+			string output = Form1.adb("shell", "ls -lL " + AdbClient.QuoteShell(directoryPath));
 			string[] lines = output.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
 
 			string filteredOutput = string.Join(Environment.NewLine, lines);

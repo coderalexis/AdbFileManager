@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -89,18 +89,25 @@ namespace AdbFileManager {
 			UpdateGeneratedString();
 		}
 
-		private void button1_Click(object sender, EventArgs e) {
-			Form1.showConsole();
-			Console.WriteLine("adb install command execution is running, please wait...");
-
-			string result = Form1.adb(richTextBox1.Text);
-			Console.WriteLine("adb install command execution finished.");
-			MessageBox.Show(result, "Apk Install Result", MessageBoxButtons.OK, MessageBoxIcon.Information);
-			Form1.hideConsole();
-
-
-
-
-		}
-	}
+        private async void button1_Click(object sender, EventArgs e) {
+            button1.Enabled = false;
+            try {
+                var arguments = new List<string> { "install" };
+                if (checkBox_allPermissions.Checked) arguments.Add("--grant-all-permissions");
+                if (checkBox_allowDowngrade.Checked) arguments.Add("--downgrade");
+                if (checkBox_noStreaming.Checked) arguments.Add("--no-streaming");
+                if (checkBox_tooOldBypass.Checked) arguments.Add("--bypass-low-target-sdk-block");
+                if (checkBox_replace.Checked) arguments.Add("--replace");
+                if (radioButton_destInternal.Checked) arguments.AddRange(new[] { "--install-location", "1" });
+                if (radioButton_destSD.Checked) arguments.AddRange(new[] { "--install-location", "2" });
+                arguments.AddRange(CommandArguments.Parse(textBox_customFlags.Text));
+                arguments.Add(textBox_apkPath.Text);
+                var result = await AdbClient.Default.ExecuteAsync(arguments, Form1.selectedDevice?.adbId);
+                result.EnsureSuccess();
+                MessageBox.Show(result.CombinedOutput, "APK", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex) { MessageBox.Show(this, ex.Message, "APK", MessageBoxButtons.OK, MessageBoxIcon.Error); }
+            finally { if (!IsDisposed) button1.Enabled = true; }
+        }
+    }
 }

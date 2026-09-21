@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -46,6 +46,11 @@ namespace AdbFileManager {
             Application.DoEvents();
 
             ApplyLocalization();
+            // Queue transfers supersede the legacy copy/progress modes; retain saved fields for compatibility.
+            checkBox_useLegacyCopy.Enabled = false;
+            checkBox_unwrapFolderLegacy.Enabled = false;
+            checkBox_showTwoProgressBars.Enabled = false;
+            toolTip1.SetToolTip(checkBox_useLegacyCopy, Transfers.QueueText.Get("hint"));
             loadingSettings = false;
         }
 
@@ -125,7 +130,7 @@ namespace AdbFileManager {
 
             label_trackbarValue.Text = value.ToString() + " ms";
 
-            AdbProgressRunner.timeoutMs = value;
+            AdbProgressRunner.ProgressIntervalMs = value;
 
             if (loadingSettings) return;
 
@@ -150,7 +155,8 @@ namespace AdbFileManager {
             checkBox_previewMediaFiles.Text = AdbFileManager.strings.settings_previewMedia;
             checkBox_useLegacyCopy.Text = AdbFileManager.strings.settings_useLegacyCopy;
             checkBox_unwrapFolderLegacy.Text = AdbFileManager.strings.settings_unwrapFolders;
-            label5.Text = AdbFileManager.strings.settings_progressSyncDelay;
+            label5.Text = Form1.rm.GetString("settings_progressUpdateInterval");
+            toolTip1.SetToolTip(trackBar_progressWait, Form1.rm.GetString("settings_progressUpdateInterval"));
             checkBox_compatibilityMode.Text = AdbFileManager.strings.settings_compatibilityFix;
             checkBox_fastCompatibility.Text = AdbFileManager.strings.settings_fastCompatibility;
             checkBox_rememberLocation.Text = AdbFileManager.strings.settings_openLastLocation;
