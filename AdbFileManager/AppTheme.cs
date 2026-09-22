@@ -160,6 +160,32 @@ namespace AdbFileManager {
             grid.RowHeadersDefaultCellStyle.ForeColor = Text;
             grid.RowHeadersDefaultCellStyle.SelectionBackColor = Selection;
             grid.RowHeadersDefaultCellStyle.SelectionForeColor = Text;
+            grid.CellPainting -= PaintGridCell;
+            grid.CellPainting += PaintGridCell;
+        }
+
+        private static void PaintGridCell(object? sender, DataGridViewCellPaintingEventArgs e) {
+            if (sender is not DataGridView) return;
+
+            if (e.RowIndex == -1 && e.ColumnIndex >= 0) {
+                using var background = new SolidBrush(SurfaceRaised);
+                using var border = new Pen(Border);
+                e.Graphics.FillRectangle(background, e.CellBounds);
+                e.PaintContent(e.CellBounds);
+                e.Graphics.DrawLine(border, e.CellBounds.Right - 1, e.CellBounds.Top,
+                    e.CellBounds.Right - 1, e.CellBounds.Bottom - 1);
+                e.Graphics.DrawLine(border, e.CellBounds.Left, e.CellBounds.Bottom - 1,
+                    e.CellBounds.Right - 1, e.CellBounds.Bottom - 1);
+                e.Handled = true;
+                return;
+            }
+
+            if (e.RowIndex >= 0 && (e.State & DataGridViewElementStates.Selected) != 0) {
+                using var selection = new SolidBrush(Selection);
+                e.Graphics.FillRectangle(selection, e.CellBounds);
+                e.PaintContent(e.CellBounds);
+                e.Handled = true;
+            }
         }
 
         private static void StyleTabs(TabControl tabs) {

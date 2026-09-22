@@ -177,7 +177,8 @@ namespace AdbFileManager {
 			form1.dataGridView_soubory.RowHeadersDefaultCellStyle.SelectionForeColor = foreColor;
 			form1.dataGridView_soubory.ColumnHeadersDefaultCellStyle.BackColor = brighterBackColor;
 			form1.dataGridView_soubory.ColumnHeadersDefaultCellStyle.ForeColor = foreColor;
-			form1.dataGridView_soubory.ColumnHeadersDefaultCellStyle.SelectionBackColor = selectedColor;
+			form1.dataGridView_soubory.ColumnHeadersDefaultCellStyle.SelectionBackColor = brighterBackColor;
+			form1.dataGridView_soubory.ColumnHeadersDefaultCellStyle.SelectionForeColor = foreColor;
 			form1.dataGridView_soubory.EnableHeadersVisualStyles = false;
 
 			form1.dataGridView_soubory.GridColor = Color.FromArgb(64, 64, 64);
