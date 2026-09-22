@@ -68,3 +68,5 @@ Antes de usarlo para un respaldo importante, comprobar con archivos de prueba:
 5. Provocar conflictos de archivo y carpeta en ambos sentidos; validar Omitir, Conservar ambos y Reemplazar archivo.
 6. Cerrar la aplicación con trabajos pendientes, volver a abrirla y confirmar que la cola se restaura pausada.
 7. Comparar el tiempo de la aplicación con `adb pull`/`adb push` directos, usando idéntico dispositivo, archivos y conexión.
+
+La prueba física automatizada y su procedimiento de evidencia están descritos en `DEVICE_TESTING.md`. Se ejecutan con `scripts/device-smoke.ps1` y permanecen omitidos en la suite normal cuando no se define `AFM_DEVICE_SERIAL`.
