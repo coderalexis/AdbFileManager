@@ -23,6 +23,7 @@ namespace AdbFileManager {
 
 			ResourceManager rm = new ResourceManager("AdbFileManager.strings", Assembly.GetExecutingAssembly());
 			label_freezewarn.Text = rm.GetString(cancellable ? "copy_cancel_hint" : "copy_freeze_warn");
+			AppTheme.Apply(this);
 		}
 		public void Update(int current, int max, string source, string dest, string _filename, float percentage = -1) {
 			Console.WriteLine($"cur: {current} max: {max} perc: {percentage}");

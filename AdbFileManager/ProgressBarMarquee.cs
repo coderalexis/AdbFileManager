@@ -15,6 +15,7 @@ namespace AdbFileManager {
 		public ProgressBarMarquee() {
 			InitializeComponent();
 			TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Indeterminate);
+			AppTheme.Apply(this);
 		}
 		public void set(string text, string title) {
 			this.Text = title;

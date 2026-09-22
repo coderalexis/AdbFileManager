@@ -52,6 +52,7 @@ namespace AdbFileManager {
             checkBox_showTwoProgressBars.Enabled = false;
             toolTip1.SetToolTip(checkBox_useLegacyCopy, Transfers.QueueText.Get("hint"));
             loadingSettings = false;
+            AppTheme.Apply(this);
         }
 
         bool loadingSettings = true;
@@ -146,7 +147,8 @@ namespace AdbFileManager {
             this.Text = AdbFileManager.strings.settings_title;
 
             // Tabs
-            //tab_behaviour.Text = AdbFileManager.strings.settings_tab_behaviour; //crashes for some reason
+            if (tabControl1.TabPages.Count > 0)
+                tabControl1.TabPages[0].Text = AdbFileManager.strings.settings_tab_behaviour;
             tab_appearance.Text = AdbFileManager.strings.settings_tab_appearance;
 
             // Behaviour tab

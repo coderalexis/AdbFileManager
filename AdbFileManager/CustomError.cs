@@ -25,6 +25,8 @@ namespace AdbFileManager {
             // Add button2 to the form.
             this.Controls.Add(button2);
 
+            AppTheme.Apply(this);
+
             // Display the form as a modal dialog box.
             this.ShowDialog();
         }

@@ -89,7 +89,12 @@ namespace AdbFileManager {
 
                 //set Console app codepage to UTF-8.
                 Console.OutputEncoding = System.Text.Encoding.UTF8;
-                Console.WindowHeight = 20;
+                try {
+                    if (!Console.IsOutputRedirected) Console.WindowHeight = 20;
+                }
+                catch (IOException) {
+                    // GUI launches and redirected test runs may not have a resizable console.
+                }
 
                 string versionn = $"{AdbFileManager.Properties.Resources.CurrentCommit.Trim()} 06.07.2025";
                 label_version.Text = versionn;

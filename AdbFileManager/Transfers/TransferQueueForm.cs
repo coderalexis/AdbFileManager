@@ -46,6 +46,7 @@ namespace AdbFileManager.Transfers {
             layout.Controls.Add(details, 0, 3);
             layout.Controls.Add(summary, 0, 4);
             Controls.Add(layout);
+            AppTheme.Apply(this);
             queue.Changed += RefreshQueue;
             queue.ProgressChanged += RefreshProgress;
             FormClosing += (_, e) => { if (!AllowClose) { e.Cancel = true; Hide(); } };
@@ -75,7 +76,9 @@ namespace AdbFileManager.Transfers {
                 row.SetValues(job.Name, job.FromAndroid ? "Android → PC" : "PC → Android", job.DeviceId,
                     job.ResolvedDestination ?? job.Destination, QueueText.Get(job.State.ToString()), job.Attempts,
                     job.Percent < 0 ? "—" : $"{job.Percent}%");
-                row.DefaultCellStyle.ForeColor = job.State == TransferState.Failed ? Color.Firebrick : SystemColors.ControlText;
+                row.DefaultCellStyle.ForeColor = job.State == TransferState.Failed
+                    ? (SettingsManager.settings.DarkMode ? AppTheme.Error : Color.Firebrick)
+                    : (SettingsManager.settings.DarkMode ? AppTheme.Text : SystemColors.ControlText);
             }
             summary.Text = (queue.IsRunning ? QueueText.Get("active") : QueueText.Get("stopped")) + " · " + QueueText.Summary(queue.Summary);
             UpdateDetails();

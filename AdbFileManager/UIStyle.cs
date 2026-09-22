@@ -149,12 +149,13 @@ namespace AdbFileManager {
 			}
 
 		}
-		public static Color backColor = ColorTranslator.FromHtml("#202020");
-		public static Color darkerBackColor = ColorTranslator.FromHtml("#151515");
-		public static Color brighterBackColor = ColorTranslator.FromHtml("#404040");
-		public static Color foreColor = ColorTranslator.FromHtml("#FFFFFF");
-		public static Color selectedColor = ColorTranslator.FromHtml("#0000FF");
+		public static Color backColor = AppTheme.Surface;
+		public static Color darkerBackColor = AppTheme.Window;
+		public static Color brighterBackColor = AppTheme.SurfaceRaised;
+		public static Color foreColor = AppTheme.Text;
+		public static Color selectedColor = AppTheme.Selection;
 		public static void LoadDarkMode(Form1 form1) {
+			AppTheme.Apply(form1);
 			form1.button_android2pc.EnableDarkMode();
 			form1.button_pc2android.EnableDarkMode();
 			form1.verticalLabel_refresh.EnableDarkMode();
@@ -180,15 +181,6 @@ namespace AdbFileManager {
 			form1.dataGridView_soubory.EnableHeadersVisualStyles = false;
 
 			form1.dataGridView_soubory.GridColor = Color.FromArgb(64, 64, 64);
-
-			try {
-				Util.Find<HScrollBar>(form1.dataGridView_soubory).BackColor = Color.Red;
-			}
-			catch { }
-			try {
-				Util.Find<VScrollBar>(form1.dataGridView_soubory).BackColor = Color.Red;
-			}
-			catch { }
 
 			form1.cur_path.BackColor = backColor;
 			form1.cur_path.ForeColor = foreColor;

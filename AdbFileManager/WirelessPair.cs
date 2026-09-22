@@ -13,6 +13,7 @@ namespace AdbFileManager {
 		public WirelessPair() {
 			InitializeComponent();
 			ApplyLocalization();
+			AppTheme.Apply(this);
 		}
 
 		private void ApplyLocalization() {

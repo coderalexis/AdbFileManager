@@ -15,6 +15,7 @@ namespace AdbFileManager {
 		public UnlockForm() {
 			InitializeComponent();
 			ApplyLocalization();
+			AppTheme.Apply(this);
 		}
 
 		private void ApplyLocalization() {

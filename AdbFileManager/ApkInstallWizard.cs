@@ -53,6 +53,7 @@ namespace AdbFileManager {
 			else if(!SettingsManager.settings.UseWindows11Icons) {
 				this.BackColor = Color.FromArgb(185, 209, 234);
 			}
+			AppTheme.Apply(this);
 		}
 
 		private void UpdateGeneratedString() {

@@ -28,6 +28,7 @@ namespace AdbFileManager.Transfers {
             }
             layout.Controls.Add(buttons, 0, 3);
             Controls.Add(layout);
+            AppTheme.Apply(this);
         }
     }
 }
