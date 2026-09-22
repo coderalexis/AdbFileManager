@@ -220,6 +220,12 @@
   <data name="settings_title" xml:space="preserve">
     <value>設定</value>
   </data>
+  <data name="settings_saveHint" xml:space="preserve">
+    <value>このウィンドウを閉じると変更が保存されます。</value>
+  </data>
+  <data name="settings_saveAndClose" xml:space="preserve">
+    <value>保存して閉じる</value>
+  </data>
   <data name="settings_tab_behaviour" xml:space="preserve">
     <value>動作</value>
   </data>
@@ -278,8 +284,7 @@
     <value>ダークモードを有効にする</value>
   </data>
   <data name="settings_darkModeNote" xml:space="preserve">
-    <value>注意: PCファイルエクスプローラーは、Windows自体で
-ダークモードが有効な場合のみダークモードになります</value>
+    <value>変更はアプリの再起動後に適用されます。</value>
   </data>
   <data name="settings_twoProgressBars" xml:space="preserve">
     <value>2つのコピー進捗バーを表示</value>

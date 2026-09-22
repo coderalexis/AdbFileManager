@@ -220,6 +220,12 @@ Data: {2}</value>
   <data name="settings_title" xml:space="preserve">
     <value>Ustawienia</value>
   </data>
+  <data name="settings_saveHint" xml:space="preserve">
+    <value>Zmiany są zapisywane po zamknięciu tego okna.</value>
+  </data>
+  <data name="settings_saveAndClose" xml:space="preserve">
+    <value>Zapisz i zamknij</value>
+  </data>
   <data name="settings_tab_behaviour" xml:space="preserve">
     <value>Zachowanie</value>
   </data>
@@ -278,8 +284,7 @@ Data: {2}</value>
     <value>Tryb ciemny</value>
   </data>
   <data name="settings_darkModeNote" xml:space="preserve">
-    <value>Uwaga: Explorer ciemny tylko gdy
-Windows ma tryb ciemny</value>
+    <value>Zmiana zostanie zastosowana po ponownym uruchomieniu aplikacji.</value>
   </data>
   <data name="settings_twoProgressBars" xml:space="preserve">
     <value>Dwa paski postępu</value>

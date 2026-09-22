@@ -95,10 +95,15 @@ namespace AdbFileManager {
         }
         bool restartNeededChangesMade = false;
         private void SettingsForm_FormClosing(object sender, FormClosingEventArgs e) {
+            SettingsManager.SaveSettings();
             if (restartNeededChangesMade) {
                 string message = AdbFileManager.strings.restartNeeded;
                 MessageBox.Show(message, AdbFileManager.strings.restartRequired, MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
+        }
+
+        private void buttonSaveAndClose_Click(object sender, EventArgs e) {
+            Close();
         }
 
         private void checkBox_useLegacyCopy_CheckedChanged(object sender, EventArgs e) {
@@ -173,6 +178,8 @@ namespace AdbFileManager {
             radioButton5.Text = AdbFileManager.strings.settings_fluentGradient;
             checkBox_darkMode.Text = AdbFileManager.strings.settings_darkMode;
             label4.Text = AdbFileManager.strings.settings_darkModeNote;
+            settingsSaveHint.Text = Form1.rm.GetString("settings_saveHint") ?? "Changes are saved when this window closes.";
+            buttonSaveAndClose.Text = Form1.rm.GetString("settings_saveAndClose") ?? "Save and close";
             checkBox_showTwoProgressBars.Text = AdbFileManager.strings.settings_twoProgressBars;
             checkBox3.Text = AdbFileManager.strings.settings_showBackButton;
         }

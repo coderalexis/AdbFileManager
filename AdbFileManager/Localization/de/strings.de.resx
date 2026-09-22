@@ -220,6 +220,12 @@ Datum: {2}</value>
   <data name="settings_title" xml:space="preserve">
     <value>Einstellungen</value>
   </data>
+  <data name="settings_saveHint" xml:space="preserve">
+    <value>Änderungen werden beim Schließen dieses Fensters gespeichert.</value>
+  </data>
+  <data name="settings_saveAndClose" xml:space="preserve">
+    <value>Speichern und schließen</value>
+  </data>
   <data name="settings_tab_behaviour" xml:space="preserve">
     <value>Verhalten</value>
   </data>
@@ -278,8 +284,7 @@ Datum: {2}</value>
     <value>Dunkelmodus</value>
   </data>
   <data name="settings_darkModeNote" xml:space="preserve">
-    <value>Hinweis: Explorer nur dunkel wenn
-Windows Dunkelmodus aktiviert hat</value>
+    <value>Die Änderung wird nach einem Neustart der Anwendung wirksam.</value>
   </data>
   <data name="settings_twoProgressBars" xml:space="preserve">
     <value>Zwei Fortschrittsbalken</value>

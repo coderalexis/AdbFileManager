@@ -196,6 +196,12 @@ Tenga en cuenta que estos pasos pueden variar según el teléfono.</value>
   <data name="settings_title" xml:space="preserve">
     <value>Configuración</value>
   </data>
+  <data name="settings_saveHint" xml:space="preserve">
+    <value>Los cambios se guardan al cerrar esta ventana.</value>
+  </data>
+  <data name="settings_saveAndClose" xml:space="preserve">
+    <value>Guardar y cerrar</value>
+  </data>
   <data name="settings_tab_behaviour" xml:space="preserve">
     <value>Comportamiento</value>
   </data>
@@ -254,8 +260,7 @@ Tenga en cuenta que estos pasos pueden variar según el teléfono.</value>
     <value>Modo oscuro</value>
   </data>
   <data name="settings_darkModeNote" xml:space="preserve">
-    <value>Nota: Explorer solo oscuro si
-Windows tiene modo oscuro</value>
+    <value>El cambio se aplica después de reiniciar la aplicación.</value>
   </data>
   <data name="settings_twoProgressBars" xml:space="preserve">
     <value>Dos barras de progreso</value>

@@ -186,6 +186,12 @@ Prosím vydržte chvilku...</value>
   <data name="settings_title" xml:space="preserve">
     <value>Nastavení</value>
   </data>
+  <data name="settings_saveHint" xml:space="preserve">
+    <value>Změny se uloží při zavření tohoto okna.</value>
+  </data>
+  <data name="settings_saveAndClose" xml:space="preserve">
+    <value>Uložit a zavřít</value>
+  </data>
   <data name="settings_tab_behaviour" xml:space="preserve">
     <value>Chování</value>
   </data>
@@ -244,8 +250,7 @@ Prosím vydržte chvilku...</value>
     <value>Povolit tmavý režim</value>
   </data>
   <data name="settings_darkModeNote" xml:space="preserve">
-    <value>Poznámka: Průzkumník souborů PC bude tmavý
-pouze pokud má Windows povolen tmavý režim</value>
+    <value>Změna se projeví po restartování aplikace.</value>
   </data>
   <data name="settings_twoProgressBars" xml:space="preserve">
     <value>Dva ukazatele průběhu</value>

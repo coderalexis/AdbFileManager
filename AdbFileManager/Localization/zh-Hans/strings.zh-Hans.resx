@@ -182,6 +182,12 @@
   <data name="settings_title" xml:space="preserve">
     <value>设置</value>
   </data>
+  <data name="settings_saveHint" xml:space="preserve">
+    <value>关闭此窗口时会保存更改。</value>
+  </data>
+  <data name="settings_saveAndClose" xml:space="preserve">
+    <value>保存并关闭</value>
+  </data>
   <data name="settings_tab_behaviour" xml:space="preserve">
     <value>行为</value>
   </data>
@@ -240,8 +246,7 @@
     <value>启用深色模式</value>
   </data>
   <data name="settings_darkModeNote" xml:space="preserve">
-    <value>注意：只有当 Windows 本身启用深色模式时，
-电脑文件资源管理器才会显示为深色</value>
+    <value>更改将在重新启动应用后生效。</value>
   </data>
   <data name="settings_twoProgressBars" xml:space="preserve">
     <value>显示两个复制进度条</value>

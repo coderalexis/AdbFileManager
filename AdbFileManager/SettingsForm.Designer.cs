@@ -53,6 +53,9 @@
             radioButton2 = new RadioButton();
             radioButton1 = new RadioButton();
             label1 = new Label();
+            settingsActionsPanel = new Panel();
+            settingsSaveHint = new Label();
+            buttonSaveAndClose = new Button();
             toolTip1 = new ToolTip(components);
             tab_behaviour = new TabPage();
             tab_behaviour.SuspendLayout();
@@ -61,6 +64,7 @@
             tab_appearance.SuspendLayout();
             panel2.SuspendLayout();
             panel1.SuspendLayout();
+            settingsActionsPanel.SuspendLayout();
             SuspendLayout();
             // 
             // tab_behaviour
@@ -401,13 +405,44 @@
             label1.Size = new Size(57, 15);
             label1.TabIndex = 0;
             label1.Text = "Icon style";
-            // 
+            //
+            // settingsActionsPanel
+            //
+            settingsActionsPanel.Controls.Add(settingsSaveHint);
+            settingsActionsPanel.Controls.Add(buttonSaveAndClose);
+            settingsActionsPanel.Dock = DockStyle.Bottom;
+            settingsActionsPanel.Location = new Point(0, 310);
+            settingsActionsPanel.Name = "settingsActionsPanel";
+            settingsActionsPanel.Size = new Size(456, 48);
+            settingsActionsPanel.TabIndex = 1;
+            //
+            // settingsSaveHint
+            //
+            settingsSaveHint.AutoSize = true;
+            settingsSaveHint.Location = new Point(12, 17);
+            settingsSaveHint.Name = "settingsSaveHint";
+            settingsSaveHint.Size = new Size(216, 15);
+            settingsSaveHint.TabIndex = 0;
+            settingsSaveHint.Text = "Changes are saved when this window closes.";
+            //
+            // buttonSaveAndClose
+            //
+            buttonSaveAndClose.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonSaveAndClose.Location = new Point(322, 9);
+            buttonSaveAndClose.Name = "buttonSaveAndClose";
+            buttonSaveAndClose.Size = new Size(122, 30);
+            buttonSaveAndClose.TabIndex = 1;
+            buttonSaveAndClose.Text = "Save and close";
+            buttonSaveAndClose.UseVisualStyleBackColor = true;
+            buttonSaveAndClose.Click += buttonSaveAndClose_Click;
+            //
             // SettingsForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(456, 310);
+            ClientSize = new Size(456, 358);
             Controls.Add(tabControl1);
+            Controls.Add(settingsActionsPanel);
             Name = "SettingsForm";
             Text = "SettingsForm";
             FormClosing += SettingsForm_FormClosing;
@@ -421,6 +456,8 @@
             panel2.PerformLayout();
             panel1.ResumeLayout(false);
             panel1.PerformLayout();
+            settingsActionsPanel.ResumeLayout(false);
+            settingsActionsPanel.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -456,5 +493,8 @@
 		private TrackBar trackBar_progressWait;
 		private Label label_trackbarValue;
 		private CheckBox checkBox3;
+		private Panel settingsActionsPanel;
+		private Label settingsSaveHint;
+		private Button buttonSaveAndClose;
 	}
 }
