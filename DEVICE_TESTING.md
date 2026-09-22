@@ -43,3 +43,4 @@ The test fails unless all of these checks pass:
 For review evidence, attach a screenshot showing `RESULT: ALL PHYSICAL DEVICE CHECKS PASSED` and include the transcript. State the phone model, Android version, connection type, ADB version, commit hash, and command used.
 
 The first recorded physical run is documented in `tests/DEVICE_SMOKE_RESULT_2026-09-21.md`.
+An additional 5.076 GiB real camera-folder pull, including SHA-256 verification of all 151 files, is documented in `tests/REAL_FOLDER_RESULT_2026-09-21.md`.
