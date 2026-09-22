@@ -1,6 +1,10 @@
-# AdbFileManager    
-Alternative for the MTP which is very slow. It uses adb protocol to copy files which is lot faster         
-In my testing, the program copies files at speed of approximately 41.6MiB/s (332Mib/s) over USB 2.0, compared to MTP that copies at around 10Mb/s
+# AdbFileManager — Community Fork
+
+This repository is a community fork of the original [AdbFileManager](https://github.com/T0biasCZe/AdbFileManager) project created by [T0biasCZe](https://github.com/T0biasCZe).
+
+Many thanks to the original author for designing and publishing the C# Windows Forms application that made this fork possible. This edition keeps the original ADB file-manager foundation and builds on it with transfer reliability, a persistent queue, physical-device validation, performance measurements, and further usability improvements.
+
+AdbFileManager is an alternative to MTP that uses the ADB protocol to copy files between Windows and Android. The original project reported approximately 41.6 MiB/s (332 Mib/s) over USB 2.0, compared with MTP at around 10 Mb/s.
 ![image](https://github.com/user-attachments/assets/c2571d20-c27c-4aa7-b450-5809223589ef)
 
 ## Measured performance on a physical device
@@ -8,8 +12,6 @@ In my testing, the program copies files at speed of approximately 41.6MiB/s (332
 This fork measured **37.63 MiB/s** from internal phone storage with a higher-speed USB cable. The same file reached **2.25 MiB/s** from a microSD card, identifying the removable card as the limiting component. A real 151-file, 5.076 GiB camera folder completed at **2.41 MiB/s**.
 
 See [`BENCHMARKS.md`](BENCHMARKS.md) for the test conditions and full statistics.
-
-Buy me a coffee: https://ko-fi.com/T0biasCZe 
 
 **To use this app, you must have enabled USB Debugging in android developer settings.**        
 After enabling it, just go to the directory from where you want to copy from/where to copy, select the file(s) and hit the arrow to the correct copy direction       
@@ -56,7 +58,3 @@ This fixes files being shown on very old Android versions, which dont support th
 # Windows 7 compatibility
 * The program works on Windows 7, but you need to install .NET 8 using VxKEX NEXT kernel extension.
 * However, dark mode doesnt work, and it breaks the embeded Windows Explorer. Do not use!
-
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=T0biasCZe/AdbFileManager&type=Date)](https://star-history.com/#T0biasCZe/AdbFileManager&Date)
