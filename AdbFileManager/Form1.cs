@@ -43,6 +43,12 @@ namespace AdbFileManager {
                 applyLang();
 
                 InitializeComponent();
+                explorerBrowser1.HandleCreated += (_, _) => ApplyExplorerDarkMode();
+                if (SettingsManager.settings.DarkMode) {
+                    explorerBrowser1.NavigationOptions.PaneVisibility.Commands = PaneVisibilityState.Hide;
+                    explorerBrowser1.NavigationOptions.PaneVisibility.CommandsOrganize = PaneVisibilityState.Hide;
+                    explorerBrowser1.NavigationOptions.PaneVisibility.CommandsView = PaneVisibilityState.Hide;
+                }
 
                 UIStyle.ApplyModernTheme(this);
                 if (SettingsManager.settings.DarkMode) {
@@ -161,6 +167,22 @@ namespace AdbFileManager {
                 explorerBrowser1.Navigate(Shell);
                 explorer_path.Text = path;
             }
+            finally {
+                ApplyExplorerDarkMode();
+            }
+        }
+
+        private void ApplyExplorerDarkMode() {
+            if (!SettingsManager.settings.DarkMode || !explorerBrowser1.IsHandleCreated) return;
+
+            void ApplyNativeTree() {
+                if (!explorerBrowser1.IsDisposed && explorerBrowser1.IsHandleCreated)
+                    DarkModeStartup.ApplyToControlTree(explorerBrowser1.Handle);
+            }
+
+            // ExplorerBrowser creates its DirectUI child windows asynchronously.
+            if (IsHandleCreated) BeginInvoke(ApplyNativeTree);
+            else ApplyNativeTree();
         }
 
         private async void dataGridView1_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e) {
@@ -348,6 +370,7 @@ namespace AdbFileManager {
             Console.WriteLine("Form loaded, starting timer");
             timer1.Enabled = true;
             timer1.Start();
+            ApplyExplorerDarkMode();
         }
 
         public static string ShowLibraryPopup(string libraryName) {
@@ -388,6 +411,7 @@ namespace AdbFileManager {
 
 
         private void explorerBrowser1_NavigationComplete(object sender, Microsoft.WindowsAPICodePack.Controls.NavigationCompleteEventArgs e) {
+            ApplyExplorerDarkMode();
             string currentPath = ShellObject.FromParsingName(explorerBrowser1.NavigationLog.CurrentLocation.ParsingName).Properties.System.ItemPathDisplay.Value;
             explorer_path.Text = currentPath;
 
