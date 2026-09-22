@@ -3,6 +3,12 @@ Alternative for the MTP which is very slow. It uses adb protocol to copy files w
 In my testing, the program copies files at speed of approximately 41.6MiB/s (332Mib/s) over USB 2.0, compared to MTP that copies at around 10Mb/s
 ![image](https://github.com/user-attachments/assets/c2571d20-c27c-4aa7-b450-5809223589ef)
 
+## Measured performance on a physical device
+
+This fork measured **37.63 MiB/s** from internal phone storage with a higher-speed USB cable. The same file reached **2.25 MiB/s** from a microSD card, identifying the removable card as the limiting component. A real 151-file, 5.076 GiB camera folder completed at **2.41 MiB/s**.
+
+See [`BENCHMARKS.md`](BENCHMARKS.md) for the test conditions and full statistics.
+
 Buy me a coffee: https://ko-fi.com/T0biasCZe 
 
 **To use this app, you must have enabled USB Debugging in android developer settings.**        

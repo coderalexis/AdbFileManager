@@ -57,7 +57,7 @@ Las pruebas ejecutan un simulador como proceso independiente. Cubren argumentos 
 
 ADB puede omitir porcentajes al redirigir su salida; en ese caso se muestra actividad indeterminada para el archivo actual. El total cuenta elementos seleccionados, no bytes. Los archivos temporales se eliminan al detectar un error o cancelación; una terminación forzada del proceso puede dejar un nombre `.afm-*`, pero no sustituye el destino existente.
 
-No se ha medido aún una mejora de velocidad de transferencia real ni se ha validado la cola con un teléfono físico. Algunos comandos de navegación heredados siguen usando adaptadores síncronos sobre el cliente centralizado.
+La cola y el backend se validaron con un teléfono físico. Se midieron 37.63 MiB/s desde el almacenamiento interno y aproximadamente 2.3–2.4 MiB/s desde la microSD; las condiciones y estadísticas están en `BENCHMARKS.md`. Algunos comandos de navegación heredados siguen usando adaptadores síncronos sobre el cliente centralizado.
 
 Antes de usarlo para un respaldo importante, comprobar con archivos de prueba:
 
