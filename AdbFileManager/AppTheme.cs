@@ -55,6 +55,7 @@ namespace AdbFileManager {
                 case TextBoxBase textBox:
                     textBox.BackColor = Surface;
                     textBox.ForeColor = Text;
+                    textBox.BorderStyle = BorderStyle.FixedSingle;
                     break;
                 case ComboBox combo:
                     combo.BackColor = SurfaceRaised;
@@ -144,7 +145,7 @@ namespace AdbFileManager {
             grid.EnableHeadersVisualStyles = false;
             grid.BackgroundColor = Window;
             grid.GridColor = Border;
-            grid.BorderStyle = BorderStyle.FixedSingle;
+            grid.BorderStyle = BorderStyle.None;
             grid.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
             grid.DefaultCellStyle.BackColor = Surface;
             grid.DefaultCellStyle.ForeColor = Text;
@@ -165,13 +166,40 @@ namespace AdbFileManager {
         }
 
         private static void PaintGridCell(object? sender, DataGridViewCellPaintingEventArgs e) {
-            if (sender is not DataGridView) return;
+            if (sender is not DataGridView grid) return;
 
             if (e.RowIndex == -1 && e.ColumnIndex >= 0) {
                 using var background = new SolidBrush(SurfaceRaised);
                 using var border = new Pen(Border);
                 e.Graphics.FillRectangle(background, e.CellBounds);
-                e.PaintContent(e.CellBounds);
+
+                DataGridViewColumn column = grid.Columns[e.ColumnIndex];
+                SortOrder sortOrder = column.HeaderCell.SortGlyphDirection;
+                int glyphSpace = sortOrder == SortOrder.None ? 0 : 16;
+                bool narrowHeader = e.CellBounds.Width < 50;
+                int horizontalPadding = narrowHeader ? 1 : 8;
+                Rectangle textBounds = new(
+                    e.CellBounds.Left + horizontalPadding,
+                    e.CellBounds.Top,
+                    Math.Max(0, e.CellBounds.Width - horizontalPadding * 2 - glyphSpace),
+                    e.CellBounds.Height);
+                TextFormatFlags textFlags = TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix |
+                    (narrowHeader
+                        ? TextFormatFlags.HorizontalCenter | TextFormatFlags.NoPadding
+                        : TextFormatFlags.Left | TextFormatFlags.EndEllipsis);
+                TextRenderer.DrawText(e.Graphics, Convert.ToString(e.FormattedValue) ?? string.Empty,
+                    e.CellStyle.Font ?? grid.Font, textBounds, Text, textFlags);
+
+                if (sortOrder != SortOrder.None) {
+                    int centerX = e.CellBounds.Right - 10;
+                    int centerY = e.CellBounds.Top + e.CellBounds.Height / 2;
+                    Point[] glyph = sortOrder == SortOrder.Ascending
+                        ? new[] { new Point(centerX - 4, centerY + 2), new Point(centerX + 4, centerY + 2), new Point(centerX, centerY - 3) }
+                        : new[] { new Point(centerX - 4, centerY - 2), new Point(centerX + 4, centerY - 2), new Point(centerX, centerY + 3) };
+                    using var glyphBrush = new SolidBrush(MutedText);
+                    e.Graphics.FillPolygon(glyphBrush, glyph);
+                }
+
                 e.Graphics.DrawLine(border, e.CellBounds.Right - 1, e.CellBounds.Top,
                     e.CellBounds.Right - 1, e.CellBounds.Bottom - 1);
                 e.Graphics.DrawLine(border, e.CellBounds.Left, e.CellBounds.Bottom - 1,
