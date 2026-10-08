@@ -36,6 +36,11 @@ public class AdbBackendTests {
             else await backend.CopyAsync(job, destination, true, new ProgressSink(), default);
             Assert.Equal(fail ? "original contents" : "new contents", await System.IO.File.ReadAllTextAsync(destination));
             Assert.Empty(Directory.GetDirectories(output, ".afm-*"));
+            if (fail) Assert.Null(job.TransferredBytes);
+            else {
+                Assert.Equal(new FileInfo(source).Length, job.TransferredBytes);
+                Assert.True(job.TransferSeconds > 0);
+            }
         }
         finally { Directory.Delete(root, true); }
     }

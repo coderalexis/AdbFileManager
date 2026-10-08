@@ -406,4 +406,11 @@ Esta herramienta puede intentar desbloquear el teléfono para que pueda hacer un
   <data name="browser_readError" xml:space="preserve"><value>No se pudo leer esta carpeta. Revisa la conexión, la ruta y los permisos.</value></data>
   <data name="browser_formatError" xml:space="preserve"><value>No se pudo interpretar el listado de Android. Prueba el modo de compatibilidad en Configuración.</value></data>
   <data name="browser_invalidPath" xml:space="preserve"><value>Escribe una ruta absoluta de Android que empiece con / y pulsa Enter.</value></data>
+  <data name="settings_saveError" xml:space="preserve"><value>No se pudo guardar la configuración. Revisa los permisos de la carpeta y el espacio disponible. La ventana permanecerá abierta para que puedas reintentar.</value></data>
+  <data name="settings_recovered" xml:space="preserve"><value>No se pudo cargar la configuración normalmente. Se utilizó un respaldo o la configuración predeterminada. El archivo principal dañado se conservó cuando fue posible.</value></data>
+  <data name="queue_bytes" xml:space="preserve"><value>Transferido</value></data>
+  <data name="queue_elapsed" xml:space="preserve"><value>Duración</value></data>
+  <data name="queue_average" xml:space="preserve"><value>Media</value></data>
+  <data name="queue_measuring" xml:space="preserve"><value>ADB está copiando…</value></data>
+  <data name="queue_statisticsHint" xml:space="preserve"><value>Los bytes y la velocidad media se muestran después de una copia exitosa cuando ADB informa el resumen. La media usa la duración del proceso ADB; el tiempo transcurrido incluye preparación y reintentos.</value></data>
 </root>

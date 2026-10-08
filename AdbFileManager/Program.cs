@@ -1,20 +1,17 @@
 namespace AdbFileManager {
     internal static class Program {
-        /// <summary>
-        ///  The main entry point for the application.
-        /// </summary>
         [STAThread]
         static void Main() {
-			SettingsManager.LoadSettings(); //nastaveni se musi naèist už tu aby jsme vìdìli zda je žádán dark mode
-			if(SettingsManager.settings.DarkMode){
-				DarkModeStartup.Initialize();
-			}
-			// To customize application configuration such as set high DPI settings or default font,
-			// see https://aka.ms/applicationconfiguration.
-			Application.SetHighDpiMode(HighDpiMode.DpiUnawareGdiScaled);
-			ApplicationConfiguration.Initialize();
-
-			Application.Run(new Form1());
+            Directory.SetCurrentDirectory(AppContext.BaseDirectory);
+            SettingsManager.LoadSettings();
+            if (SettingsManager.settings.DarkMode) DarkModeStartup.Initialize();
+            Application.SetHighDpiMode(HighDpiMode.DpiUnawareGdiScaled);
+            ApplicationConfiguration.Initialize();
+            using var main = new Form1();
+            if (SettingsManager.LoadWarning != null) main.Shown += (_, _) => MessageBox.Show(main,
+                strings.ResourceManager.GetString("settings_recovered") + Environment.NewLine + SettingsManager.LoadWarning,
+                strings.settings_title, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            Application.Run(main);
         }
     }
 }

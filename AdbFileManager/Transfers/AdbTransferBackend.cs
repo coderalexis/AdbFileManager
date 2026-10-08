@@ -41,13 +41,15 @@ namespace AdbFileManager.Transfers {
                 if (job.PreserveTimestamp) arguments.Add("-a");
                 arguments.Add(job.Source);
                 arguments.Add(staging + Path.DirectorySeparatorChar);
-                await client.CopyAsync(arguments, progress, token);
+                var statistics = await client.CopyWithStatisticsAsync(arguments, progress, token);
                 token.ThrowIfCancellationRequested();
                 string stagedFile = Path.Combine(staging, job.Name);
                 EntryKind current = await InspectAsync(job, destination, token);
                 VerifyDestination(job, current, replace);
                 if (job.IsDirectory) Directory.Move(stagedFile, destination);
                 else System.IO.File.Move(stagedFile, destination, replace);
+                job.TransferredBytes = statistics.Bytes;
+                job.TransferSeconds = statistics.Seconds;
             }
             finally {
                 // This randomly named directory was created by this operation under the target parent.
@@ -70,7 +72,7 @@ namespace AdbFileManager.Transfers {
             try {
                 await client.QueryAsync(new[] { "shell", $"mkdir -p {AdbClient.QuoteShell(parent)} && mkdir {quotedStaging}" }, job.DeviceId, token);
                 created = true;
-                await client.CopyAsync(new[] { "-s", job.DeviceId, "push", job.Source, staging + "/" }, progress, token);
+                var statistics = await client.CopyWithStatisticsAsync(new[] { "-s", job.DeviceId, "push", job.Source, staging + "/" }, progress, token);
                 token.ThrowIfCancellationRequested();
                 EntryKind current = await InspectAsync(job, destination, token);
                 VerifyDestination(job, current, replace);
@@ -81,6 +83,8 @@ namespace AdbFileManager.Transfers {
                 string command = $"mv {flags} {source} {target} && " +
                     $"if [ -e {source} ] || [ -L {source} ]; then echo 'Destination changed during transfer' >&2; exit 1; fi";
                 await client.QueryAsync(new[] { "shell", command }, job.DeviceId, token);
+                job.TransferredBytes = statistics.Bytes;
+                job.TransferSeconds = statistics.Seconds;
             }
             finally {
                 if (created) {

@@ -12,6 +12,9 @@ namespace AdbFileManager.Transfers {
                 if (job.Id == Guid.Empty || string.IsNullOrWhiteSpace(job.DeviceId) ||
                     string.IsNullOrWhiteSpace(job.Source) || string.IsNullOrWhiteSpace(job.Destination))
                     throw new InvalidDataException("The saved transfer queue contains an invalid entry.");
+                if (!double.IsFinite(job.ElapsedSeconds) || job.ElapsedSeconds < 0 || job.ElapsedSeconds >= TimeSpan.MaxValue.TotalSeconds ||
+                    job.TransferredBytes < 0 || job.TransferSeconds.HasValue && (!double.IsFinite(job.TransferSeconds.Value) || job.TransferSeconds.Value < 0))
+                    throw new InvalidDataException("The saved transfer queue contains invalid statistics.");
                 if (job.State is TransferState.Running or TransferState.Retrying) {
                     job.State = TransferState.Cancelled;
                     job.Error = "Interrupted. Retry to copy this item again.";

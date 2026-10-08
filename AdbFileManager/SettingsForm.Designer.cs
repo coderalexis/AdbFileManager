@@ -93,7 +93,7 @@
             // label_trackbarValue
             // 
             label_trackbarValue.AutoSize = true;
-            label_trackbarValue.Location = new Point(18, 146);
+            label_trackbarValue.Location = new Point(18, 170);
             label_trackbarValue.Name = "label_trackbarValue";
             label_trackbarValue.Size = new Size(35, 15);
             label_trackbarValue.TabIndex = 12;

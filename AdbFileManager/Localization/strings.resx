@@ -414,4 +414,11 @@ Please enable Compatibility mode in settings, and then click Refresh.</value>
   <data name="browser_readError" xml:space="preserve"><value>Could not read this folder. Check the connection, path and permissions.</value></data>
   <data name="browser_formatError" xml:space="preserve"><value>Could not interpret the Android file listing. Try compatibility mode in Settings.</value></data>
   <data name="browser_invalidPath" xml:space="preserve"><value>Enter an absolute Android path starting with / and press Enter.</value></data>
+  <data name="settings_saveError" xml:space="preserve"><value>Could not save settings. Check folder permissions and available disk space. The window will remain open so you can retry.</value></data>
+  <data name="settings_recovered" xml:space="preserve"><value>The settings file could not be loaded normally. A backup or default settings were used. Any damaged main file was preserved when possible.</value></data>
+  <data name="queue_bytes" xml:space="preserve"><value>Transferred</value></data>
+  <data name="queue_elapsed" xml:space="preserve"><value>Elapsed</value></data>
+  <data name="queue_average" xml:space="preserve"><value>Average</value></data>
+  <data name="queue_measuring" xml:space="preserve"><value>ADB is copying…</value></data>
+  <data name="queue_statisticsHint" xml:space="preserve"><value>Bytes and average speed are shown after a successful copy when ADB reports a transfer summary. Average speed uses the ADB process duration; elapsed time includes preparation and retries.</value></data>
 </root>

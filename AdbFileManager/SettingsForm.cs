@@ -12,6 +12,8 @@ namespace AdbFileManager {
     public partial class SettingsForm : Form {
         public SettingsForm() {
             InitializeComponent();
+            SettingsStore.Normalize(SettingsManager.settings);
+            label3.Visible = false;
             //change the tab to the second tab
             tabControl1.SelectedTab = tab_appearance;
 
@@ -28,6 +30,7 @@ namespace AdbFileManager {
             radioButton5.Checked = SettingsManager.settings.ButtonTheme == 2; // Fluent gradient
 
             trackBar_progressWait.Value = (SettingsManager.settings.progressWaitTimeMs - 20) / 10;
+            label_trackbarValue.Text = SettingsManager.settings.progressWaitTimeMs + " ms";
             label_trackbarValue.Left = (trackBar_progressWait.Left + trackBar_progressWait.Value * (trackBar_progressWait.Width - 20) / trackBar_progressWait.Maximum) - 8;
 
             comboBox_lang.SelectedIndex = SettingsManager.settings.lang.HasValue ? SettingsManager.settings.lang.Value : 0; // Default to first language
@@ -97,7 +100,13 @@ namespace AdbFileManager {
         }
         bool restartNeededChangesMade = false;
         private void SettingsForm_FormClosing(object sender, FormClosingEventArgs e) {
-            SettingsManager.SaveSettings();
+            try { SettingsManager.SaveSettings(); }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException) {
+                e.Cancel = true;
+                MessageBox.Show(this, strings.ResourceManager.GetString("settings_saveError") + Environment.NewLine + ex.Message,
+                    strings.settings_title, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
             if (restartNeededChangesMade) {
                 string message = AdbFileManager.strings.restartNeeded;
                 MessageBox.Show(message, AdbFileManager.strings.restartRequired, MessageBoxButtons.OK, MessageBoxIcon.Information);

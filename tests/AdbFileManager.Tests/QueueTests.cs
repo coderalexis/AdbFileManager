@@ -95,6 +95,8 @@ public class QueueTests {
         await queue.RunAsync();
         Assert.Equal(3, job.Attempts); Assert.Equal(TransferState.Completed, job.State);
         Assert.Empty(job.Error);
+        Assert.NotNull(job.StartedAt);
+        Assert.True(job.ElapsedSeconds >= 0);
     }
 
     [Fact]

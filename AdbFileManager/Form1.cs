@@ -101,7 +101,7 @@ namespace AdbFileManager {
                     // GUI launches and redirected test runs may not have a resizable console.
                 }
 
-                string versionn = $"{AdbFileManager.Properties.Resources.CurrentCommit.Trim()} 06.07.2025";
+                string versionn = AdbFileManager.Properties.Resources.CurrentCommit.Trim();
                 label_version.Text = versionn;
                 Console.WriteLine(versionn);
                 InitializeTransfers();
@@ -438,6 +438,14 @@ namespace AdbFileManager {
                 transferQueue.Pause();
                 return;
             }
+            try { SettingsManager.SaveSettings(); }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException) {
+                e.Cancel = true;
+                closeAfterQueue = false;
+                MessageBox.Show(this, strings.ResourceManager.GetString("settings_saveError") + Environment.NewLine + ex.Message,
+                    strings.settings_title, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
             if (queueWindow != null) queueWindow.AllowClose = true;
             SaveAndRefreshQueue();
             //show console
@@ -454,8 +462,6 @@ namespace AdbFileManager {
                 Directory.Delete(tempPath, true);
             }
             Console.WriteLine("Saving new settings...");
-            SettingsManager.SaveSettings();
-
             Console.WriteLine("Settings saved!");
         }
 

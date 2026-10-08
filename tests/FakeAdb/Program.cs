@@ -16,6 +16,10 @@ public static class Program {
                     Console.Error.WriteLine("Permission denied (simulated)");
                     return 1;
                 }
+                long bytes = Directory.Exists(source)
+                    ? Directory.GetFiles(source, "*", SearchOption.AllDirectories).Sum(file => new FileInfo(file).Length)
+                    : new FileInfo(source).Length;
+                Console.WriteLine($"1 file pulled. ({bytes} bytes in 0.100s)");
                 return 0;
             }
         }

@@ -40,7 +40,7 @@ namespace AdbFileManager.Transfers {
             foreach (var job in Jobs.Where(j => j.State is TransferState.Failed or TransferState.Cancelled)) {
                 job.State = TransferState.Pending;
                 job.Error = "";
-                job.FinishedAt = null;
+                job.ResetStatistics();
                 job.Percent = -1;
             }
             Changed?.Invoke();
@@ -64,6 +64,7 @@ namespace AdbFileManager.Transfers {
                     activeCancellation = cancellation;
                     job.State = TransferState.Running;
                     job.Error = "";
+                    job.BeginRun();
                     Changed?.Invoke();
                     try {
                         string destination = job.ResolvedDestination ?? job.Destination;
@@ -102,6 +103,8 @@ namespace AdbFileManager.Transfers {
                             job.State = TransferState.Running;
                             job.Attempts++;
                             job.Percent = -1;
+                            job.TransferredBytes = null;
+                            job.TransferSeconds = null;
                             Changed?.Invoke();
                             try {
                                 await backend.CopyAsync(job, destination, replace, progress, cancellation.Token);
@@ -127,6 +130,7 @@ namespace AdbFileManager.Transfers {
                         job.Error = ex.Message;
                     }
                     finally {
+                        job.FinishRun();
                         job.FinishedAt = DateTimeOffset.Now;
                         activeCancellation = null;
                         Changed?.Invoke();

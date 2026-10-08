@@ -6,6 +6,8 @@ En esta copia se instaló un SDK local en `.tools/dotnet`; no se incluye en Git 
 
 ## Ejecutar
 
+Con doble clic, abrir `Iniciar.cmd` en la raíz del repositorio. Compila Release x64 y utiliza el SDK local si está disponible.
+
 Desde PowerShell, en la raíz del repositorio:
 
 ```powershell
@@ -15,6 +17,14 @@ Desde PowerShell, en la raíz del repositorio:
 El script compila para x64 y ejecuta desde la carpeta de salida para que los iconos y ADB se encuentren correctamente. Utiliza el SDK local si existe, o `dotnet` del PATH. La configuración original Any CPU sigue generando la aplicación x86.
 
 ## Compilar y probar
+
+Para generar la distribución portable con runtime incluido:
+
+```powershell
+.\scripts\publish-portable.ps1
+```
+
+El script crea una carpeta nueva para cada publicación y genera `artifacts/AdbFileManager-win-x64.zip` y su archivo SHA-256. La primera ejecución puede descargar los paquetes de runtime de .NET. No se recortan las bibliotecas para preservar Windows Forms, COM y la serialización XML. GitHub Actions genera el mismo paquete después de compilar y probar.
 
 Con un SDK disponible en PATH:
 
@@ -63,6 +73,10 @@ Las pruebas ejecutan un simulador como proceso independiente. Cubren argumentos 
 - El modo de compatibilidad consulta el tipo real de cada entrada de forma asíncrona. El antiguo modo rápido basado en extensiones queda deshabilitado para evitar confundir carpetas con puntos y archivos sin extensión.
 
 ## Límites y validación con un teléfono
+
+La configuración se guarda en un archivo temporal, se vacía a disco y reemplaza el XML anterior conservando `settings.xml.bak`. Si el archivo principal está dañado, se aparta como `settings.xml.corrupt-*` y se intenta recuperar el respaldo. Los valores fuera de rango se normalizan antes de crear los controles. Un fallo de guardado mantiene abierta la ventana y muestra el error.
+
+La cola guarda bytes reportados por ADB, duración del proceso ADB y duración total de la tarea. La velocidad media se calcula en MiB/s sólo para trabajos completados y con un resumen válido. El tiempo total incluye preparación y reintentos; la media del proceso no los incluye. Durante una copia sin porcentajes, la ventana muestra actividad indeterminada y tiempo transcurrido. Los campos quedan vacíos cuando ADB no permite medirlos.
 
 ADB puede omitir porcentajes al redirigir su salida; en ese caso se muestra actividad indeterminada para el archivo actual. El total cuenta elementos seleccionados, no bytes. Los archivos temporales se eliminan al detectar un error o cancelación; una terminación forzada del proceso puede dejar un nombre `.afm-*`, pero no sustituye el destino existente.
 

@@ -31,34 +31,17 @@ namespace AdbFileManager {
     }
 	public static class SettingsManager {
 		public static Settings settings = new Settings();
+        private static readonly SettingsStore store = new(Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "tobiksoft", "AdbFileManager", "settings.xml"));
+        public static string? LoadWarning { get; private set; }
 
         public static void SaveSettings() {
-			string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-			string settingsPath = System.IO.Path.Combine(appDataPath, "tobiksoft", "AdbFileManager", "settings.xml");
-			System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(settingsPath)); // Ensure the directory exists
-
-			System.Xml.Serialization.XmlSerializer serializer = new System.Xml.Serialization.XmlSerializer(typeof(Settings));
-			using (var writer = new System.IO.StreamWriter(settingsPath)) {
-				serializer.Serialize(writer, settings);
-				writer.Flush();
-				writer.Close();
-			}
+            store.Save(settings);
 		}
 		public static void LoadSettings() {
-			//load the settings file if it exists, otherwise use default values
-			string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-			string settingsPath = System.IO.Path.Combine(appDataPath, "tobiksoft", "AdbFileManager", "settings.xml");
-			if (System.IO.File.Exists(settingsPath)) {
-				System.Xml.Serialization.XmlSerializer serializer = new System.Xml.Serialization.XmlSerializer(typeof(Settings));
-				using (var reader = new System.IO.StreamReader(settingsPath)) {
-					settings = (Settings)serializer.Deserialize(reader);
-					reader.Close();
-				}
-			} else {
-				// If the settings file does not exist, use default values
-				settings = new Settings();
-			}
-
+            SettingsLoadResult loaded = store.Load();
+            settings = loaded.Value;
+            LoadWarning = loaded.Warning;
 			ApplySettings();
 		}
 

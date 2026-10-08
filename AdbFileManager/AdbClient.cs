@@ -48,6 +48,16 @@ namespace AdbFileManager {
             CancellationToken cancellationToken) =>
             AdbProgressRunner.RunAsync(ExecutablePath, arguments, progress, cancellationToken);
 
+        public async Task<TransferStatistics> CopyWithStatisticsAsync(IEnumerable<string> arguments,
+            IProgress<int>? progress, CancellationToken cancellationToken) {
+            var clock = System.Diagnostics.Stopwatch.StartNew();
+            var result = await AdbProgressRunner.ExecuteAsync(ExecutablePath, arguments, progress,
+                cancellationToken, 8192).ConfigureAwait(false);
+            clock.Stop();
+            result.EnsureSuccess();
+            return TransferStatistics.FromOutput(result.CombinedOutput, clock.Elapsed);
+        }
+
         public static string[] TargetArguments(IEnumerable<string> arguments, string? deviceId) =>
             (string.IsNullOrWhiteSpace(deviceId) ? arguments : new[] { "-s", deviceId }.Concat(arguments)).ToArray();
 

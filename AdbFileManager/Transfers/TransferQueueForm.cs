@@ -8,6 +8,9 @@ namespace AdbFileManager.Transfers {
         private readonly Label summary = new() { Dock = DockStyle.Fill, AutoEllipsis = true, TextAlign = ContentAlignment.MiddleLeft };
         private readonly TextBox details = new() { Dock = DockStyle.Fill, Multiline = true, ReadOnly = true, ScrollBars = ScrollBars.Vertical };
         private readonly Dictionary<Guid, DataGridViewRow> rows = new();
+        private readonly Label activity = new() { Dock = DockStyle.Fill, AutoEllipsis = true, TextAlign = ContentAlignment.MiddleLeft };
+        private readonly ProgressBar activityProgress = new() { Dock = DockStyle.Bottom, Height = 6, MarqueeAnimationSpeed = 30 };
+        private readonly System.Windows.Forms.Timer statisticsTimer = new() { Interval = 500 };
         internal bool AllowClose { get; set; }
 
         internal TransferQueueForm(TransferQueue queue, Func<Task> run) {
@@ -15,16 +18,19 @@ namespace AdbFileManager.Transfers {
             this.run = run;
             Text = QueueText.Get("title");
             StartPosition = FormStartPosition.CenterParent;
-            Size = new Size(1060, 580);
-            MinimumSize = new Size(860, 420);
+            Size = new Size(1460, 660);
+            MinimumSize = new Size(1000, 460);
             Font = new Font("Segoe UI", 9);
             var layout = new TableLayoutPanel { Dock = DockStyle.Fill, Padding = new Padding(10), ColumnCount = 1, RowCount = 5 };
-            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 30));
+            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 52));
             layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 82));
             layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
             layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 85));
             layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 30));
-            layout.Controls.Add(new Label { Text = QueueText.Get("hint"), Dock = DockStyle.Fill }, 0, 0);
+            var statusPanel = new Panel { Dock = DockStyle.Fill };
+            statusPanel.Controls.Add(activity);
+            statusPanel.Controls.Add(activityProgress);
+            layout.Controls.Add(statusPanel, 0, 0);
             var buttons = new FlowLayoutPanel { Dock = DockStyle.Fill };
             AddButton(buttons, "resume", async () => await run());
             AddButton(buttons, "pause", () => { queue.Pause(); return Task.CompletedTask; });
@@ -33,14 +39,23 @@ namespace AdbFileManager.Transfers {
             AddButton(buttons, "clear", () => { queue.ClearFinished(); return Task.CompletedTask; });
             AddButton(buttons, "export", ExportAsync);
             layout.Controls.Add(buttons, 0, 1);
-            foreach (string key in new[] { "file", "direction", "device", "destination", "state", "attempts", "progress" })
+            foreach (string key in new[] { "file", "direction", "device", "destination", "state", "attempts", "progress", "bytes", "elapsed", "average" })
                 grid.Columns.Add(key, QueueText.Get(key));
             grid.Columns["destination"].FillWeight = 200;
             grid.Columns["file"].FillWeight = 140;
             grid.Columns["attempts"].FillWeight = 55;
             grid.Columns["progress"].FillWeight = 55;
-            grid.Columns["attempts"].MinimumWidth = 80;
-            grid.Columns["progress"].MinimumWidth = 90;
+            grid.Columns["attempts"].MinimumWidth = 95;
+            grid.Columns["progress"].MinimumWidth = 120;
+            grid.Columns["file"].MinimumWidth = 140;
+            grid.Columns["direction"].MinimumWidth = 145;
+            grid.Columns["device"].MinimumWidth = 120;
+            grid.Columns["destination"].MinimumWidth = 200;
+            grid.Columns["state"].MinimumWidth = 130;
+            foreach (string key in new[] { "bytes", "elapsed", "average" }) {
+                grid.Columns[key].FillWeight = 70;
+                grid.Columns[key].MinimumWidth = key == "elapsed" ? 120 : 150;
+            }
             grid.SelectionChanged += (_, _) => UpdateDetails();
             layout.Controls.Add(grid, 0, 2);
             layout.Controls.Add(details, 0, 3);
@@ -49,8 +64,15 @@ namespace AdbFileManager.Transfers {
             AppTheme.Apply(this);
             queue.Changed += RefreshQueue;
             queue.ProgressChanged += RefreshProgress;
+            statisticsTimer.Tick += (_, _) => RefreshStatistics();
+            VisibleChanged += (_, _) => { if (Visible) statisticsTimer.Start(); else statisticsTimer.Stop(); };
             FormClosing += (_, e) => { if (!AllowClose) { e.Cancel = true; Hide(); } };
             FormClosed += (_, _) => { queue.Changed -= RefreshQueue; queue.ProgressChanged -= RefreshProgress; };
+            Disposed += (_, _) => {
+                statisticsTimer.Dispose();
+                queue.Changed -= RefreshQueue;
+                queue.ProgressChanged -= RefreshProgress;
+            };
             RefreshQueue();
         }
 
@@ -82,15 +104,35 @@ namespace AdbFileManager.Transfers {
             }
             summary.Text = (queue.IsRunning ? QueueText.Get("active") : QueueText.Get("stopped")) + " · " + QueueText.Summary(queue.Summary);
             UpdateDetails();
+            RefreshStatistics();
         }
 
         private void RefreshProgress() {
             foreach (var job in queue.Jobs.Where(j => j.State == TransferState.Running))
                 if (rows.TryGetValue(job.Id, out var row)) row.Cells["progress"].Value = job.Percent < 0 ? "—" : $"{job.Percent}%";
+            RefreshStatistics();
         }
+        private void RefreshStatistics() {
+            if (IsDisposed) return;
+            foreach (var job in queue.Jobs) {
+                if (!rows.TryGetValue(job.Id, out var row)) continue;
+                row.Cells["bytes"].Value = job.TransferredBytes.HasValue ? $"{job.TransferredBytes.Value / 1048576d:N2} MiB" : "—";
+                row.Cells["elapsed"].Value = job.StartedAt.HasValue ? FormatElapsed(job.Elapsed) : "—";
+                row.Cells["average"].Value = job.AverageMiBPerSecond.HasValue ? $"{job.AverageMiBPerSecond.Value:N2} MiB/s" : "—";
+            }
+            var current = queue.Jobs.FirstOrDefault(job => job.State is TransferState.Running or TransferState.Retrying);
+            activity.Text = current == null ? QueueText.Get("hint") :
+                current.Name + " · " + QueueText.Get("elapsed") + ": " + FormatElapsed(current.Elapsed) +
+                (current.Percent < 0 ? " · " + QueueText.Get("measuring") : $" · {current.Percent}%");
+            activityProgress.Visible = current != null;
+            activityProgress.Style = current is { State: TransferState.Running, Percent: >= 0 } ? ProgressBarStyle.Continuous : ProgressBarStyle.Marquee;
+            if (current is { State: TransferState.Running, Percent: >= 0 }) activityProgress.Value = Math.Clamp(current.Percent, 0, 100);
+        }
+        private static string FormatElapsed(TimeSpan elapsed) => $"{(int)elapsed.TotalHours:00}:{elapsed.Minutes:00}:{elapsed.Seconds:00}";
         private void UpdateDetails() {
             if (grid.CurrentRow?.Tag is TransferJob job)
-                details.Text = job.Source + Environment.NewLine + "→ " + (job.ResolvedDestination ?? job.Destination) + Environment.NewLine + job.Error;
+                details.Text = job.Source + Environment.NewLine + "→ " + (job.ResolvedDestination ?? job.Destination) +
+                    Environment.NewLine + QueueText.Get("statisticsHint") + Environment.NewLine + job.Error;
             else details.Clear();
         }
         private Task ExportAsync() {

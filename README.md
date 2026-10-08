@@ -18,13 +18,25 @@ After enabling it, just go to the directory from where you want to copy from/whe
 
 Note2: Its made in C# and Windows Forms. To put it on Linux/Mac I would completely have to rewrite it, so no Linux/Mac version
 
-# This app requires **32 bit** .NET 8 Runtime to function   
-https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-desktop-8.0.21-windows-x86-installer
+## Start the application
+
+This fork's portable package targets **Windows 10/11 x64** and includes the .NET runtime.
+
+1. Download `AdbFileManager-win-x64` from the artifacts of a successful [GitHub Actions build](https://github.com/coderalexis/AdbFileManager/actions).
+2. Extract the artifact, then extract `AdbFileManager-win-x64.zip` into a folder.
+3. Double-click `Iniciar.cmd` or `AdbFileManager.exe`. Keep the bundled ADB, DLLs and icon folders alongside the executable.
+
+If you have the source repository, double-click **`Iniciar.cmd` in the repository root**. It compiles Release x64 and starts the app using `.tools/dotnet` when available, otherwise the installed .NET SDK. Building from source requires the **.NET 8 SDK**; see [DEVELOPMENT.md](DEVELOPMENT.md).
+
+Ordinary builds without a bundled runtime require **.NET 8 Desktop Runtime x64** for x64 builds, or **x86** for the original Any CPU build. Use the matching architecture from the [official .NET download page](https://dotnet.microsoft.com/download/dotnet/8.0).
+
+The portable package is a [self-contained .NET deployment](https://learn.microsoft.com/dotnet/core/deploying/), so it does not require a separate runtime installation.
 
 # basic controls:    
  * To enter a folder:
    * double click the folder with a left mouse button
-   * or press enter on the gameboard
+   * or press Enter on the keyboard
+   * to open a typed Android path, press Enter in the path field
  * to go up a directory:
    * press backspace on the keyboard
    * or double click the header of the file list   
@@ -37,10 +49,21 @@ https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-desktop-8.0
 # Video tutorial:
 [![Tutorial](https://i3.ytimg.com/vi/3_mgQWvYvE4/hqdefault.jpg)](https://youtu.be/3_mgQWvYvE4)
 
-# Known bugs:
-* Sometimes a folder is not shown
+## File listings and connection status
+
+Android navigation runs asynchronously. A new request cancels the previous one. Empty folders, disconnected or unauthorized devices, and listing errors have separate messages. The Android table is read only.
+
+If Android returns an unsupported listing format, enable compatibility mode. Its file-type checks use actual metadata rather than guessing from filename extensions.
+
+## Transfer statistics
+
+The transfer queue shows elapsed time while copying and bytes transferred plus average MiB/s after a successful transfer when ADB reports its summary. Average speed uses the ADB process duration. Overall elapsed time also includes preparation, conflict decisions and retries. Missing statistics are shown as `—`; live speed and ETA are not estimated from unreliable percentages.
+
+Statistics are persisted with the queue and included in its JSON export.
 
 # Settings:  
+Use **Save and close**, or close the Settings window, to persist changes. Appearance changes apply after restarting the app. Settings are written atomically with a backup; damaged XML is preserved and recovered from a backup or defaults when possible.
+
 ***Keep file modified date***     
 This keeps the file modification date of the file thats being copied, instead of changing it to the time when it was copied    
 ***Preview files on double click***  

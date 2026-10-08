@@ -358,7 +358,7 @@
     </None>
   </ItemGroup>
 
-  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+  <Target Name="PreBuild" BeforeTargets="PrepareForBuild">
     <Exec Command="git rev-parse --short HEAD" WorkingDirectory="$(ProjectDir)" ConsoleToMSBuild="true" StandardOutputImportance="Low">
       <Output TaskParameter="ConsoleOutput" PropertyName="CurrentGitCommit" />
     </Exec>
