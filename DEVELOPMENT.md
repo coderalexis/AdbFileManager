@@ -53,11 +53,20 @@ Las pruebas ejecutan un simulador como proceso independiente. Cubren argumentos 
 - Las transferencias usan nombres temporales `.afm-*` y sólo mueven el resultado al destino después de completar ADB. Esto evita dejar el destino final parcialmente escrito si la copia falla o se cancela.
 - El reemplazo de carpetas y los conflictos entre archivo y carpeta se bloquean para no borrar ni mezclar contenido sin una operación explícita.
 
+## Navegación y listado
+
+- La detección de dispositivos y el listado Android usan consultas ADB asíncronas. Cambiar de carpeta o dispositivo cancela la consulta anterior y descarta resultados tardíos.
+- Para navegar mediante la ruta escrita, pulsar Enter. Escribir cada carácter no ejecuta comandos ADB.
+- Los estados de carga, carpeta vacía, falta de dispositivo, autorización y error aparecen como mensajes separados de los archivos. Durante la carga o un error no se permite copiar desde un listado antiguo.
+- La tabla Android es de sólo lectura. Las transferencias capturan el dispositivo al que pertenece el listado mostrado, incluido cuando se utiliza la selección predeterminada.
+- El listado conserva la primera entrada aunque Android no escriba la cabecera `total`; las fechas y tamaños se interpretan con formato independiente de la configuración regional. Un formato desconocido se informa explícitamente.
+- El modo de compatibilidad consulta el tipo real de cada entrada de forma asíncrona. El antiguo modo rápido basado en extensiones queda deshabilitado para evitar confundir carpetas con puntos y archivos sin extensión.
+
 ## Límites y validación con un teléfono
 
 ADB puede omitir porcentajes al redirigir su salida; en ese caso se muestra actividad indeterminada para el archivo actual. El total cuenta elementos seleccionados, no bytes. Los archivos temporales se eliminan al detectar un error o cancelación; una terminación forzada del proceso puede dejar un nombre `.afm-*`, pero no sustituye el destino existente.
 
-La cola y el backend se validaron con un teléfono físico. Se midieron 37.63 MiB/s desde el almacenamiento interno y aproximadamente 2.3–2.4 MiB/s desde la microSD; las condiciones y estadísticas están en `BENCHMARKS.md`. Algunos comandos de navegación heredados siguen usando adaptadores síncronos sobre el cliente centralizado.
+La cola y el backend se validaron con un teléfono físico. Se midieron 37.63 MiB/s desde el almacenamiento interno y aproximadamente 2.3–2.4 MiB/s desde la microSD; las condiciones y estadísticas están en `BENCHMARKS.md`. Otros diálogos heredados todavía utilizan el adaptador síncrono de ADB.
 
 Antes de usarlo para un respaldo importante, comprobar con archivos de prueba:
 

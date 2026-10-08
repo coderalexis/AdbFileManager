@@ -102,7 +102,7 @@ namespace AdbFileManager {
                 MessageBox.Show(rm.GetString("no_files_selected"), rm.GetString("no_files_selected_title"));
                 return;
             }
-            string? selectedSerial = selectedDevice?.adbId;
+            string? selectedSerial = listedDevice;
             bool preserve = SettingsManager.settings.keepFileModificationDate;
             try {
                 // Resolve the default selection once, so queued work never switches to another phone.

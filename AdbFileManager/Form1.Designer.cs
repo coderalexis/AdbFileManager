@@ -78,6 +78,8 @@ namespace AdbFileManager {
             dataGridView_soubory.BackgroundColor = SystemColors.ButtonHighlight;
             dataGridView_soubory.GridColor = Color.White;
             dataGridView_soubory.Name = "dataGridView_soubory";
+            dataGridView_soubory.ReadOnly = true;
+            dataGridView_soubory.EditMode = DataGridViewEditMode.EditProgrammatically;
             dataGridView_soubory.RowHeadersVisible = false;
             dataGridView_soubory.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dataGridView_soubory.CellMouseDoubleClick += dataGridView1_CellMouseDoubleClick;

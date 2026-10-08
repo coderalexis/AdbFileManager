@@ -21,6 +21,7 @@
     <Compile Include="..\..\AdbFileManager\Transfers\AdbTransferBackend.cs" Link="AdbTransferBackend.cs" />
     <Compile Include="..\..\AdbFileManager\TransferCommand.cs" Link="TransferCommand.cs" />
     <Compile Include="..\..\AdbFileManager\DirectoryEntry.cs" Link="DirectoryEntry.cs" />
+    <Compile Include="..\..\AdbFileManager\AndroidBrowser.cs" Link="AndroidBrowser.cs" />
   </ItemGroup>
   <Target Name="CopyFakeRuntimeConfig" AfterTargets="Build">
     <Copy SourceFiles="..\FakeAdb\bin\$(Configuration)\net8.0\FakeAdb.runtimeconfig.json" DestinationFolder="$(OutDir)" />

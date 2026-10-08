@@ -64,7 +64,6 @@ namespace AdbFileManager {
                 dataGridView_soubory.RowHeadersWidth = 4;
                 Console.WriteLine("datagrid virtual mode: " + dataGridView_soubory.VirtualMode);
                 dataGridView_soubory.VirtualMode = false;
-                //dataGridView1.DataSource = Functions.getDir(directoryPath, checkBox_android6fix.Checked);
                 DataTable blank = new DataTable();
                 //add header to blank
                 blank.Columns.Add("ico", typeof(Icon));
@@ -106,6 +105,7 @@ namespace AdbFileManager {
                 label_version.Text = versionn;
                 Console.WriteLine(versionn);
                 InitializeTransfers();
+                InitializeBrowser();
 
             }
             catch (Exception ex) {
@@ -133,16 +133,8 @@ namespace AdbFileManager {
             }
             catch (Exception ex) { return "ADB error: " + ex.Message; }
         }
-        private void verticalLabel1_Click(object sender, EventArgs e) {
-            Console.WriteLine("verticalLabel1_Click()");
-            Console.WriteLine("verticalLabel1_Click()");
-            Console.WriteLine("verticalLabel1_Click()");
-            refreshDevicesList();
-            if (multipleDevicesDetection()) return;
-            //dataGridView_soubory.DataSource = Functions.getDir(directoryPath, checkBox_android6fix.Checked, checkBox_android6fix_fastmode.Checked);
-            dataGridView_soubory.DataSource = Functions.getDir(directoryPath, SettingsManager.settings.useCompatibilityMode, SettingsManager.settings.useFastCompatibility);
-            dataGridView_soubory.Columns[1].Width = 307;
-            dataGridView_soubory.Columns[1].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+        private async void verticalLabel1_Click(object sender, EventArgs e) {
+            await LoadAndroidDirectoryAsync(directoryPath);
         }
 
         private void explorerBrowser1_Load(object sender, EventArgs e) {
@@ -187,7 +179,7 @@ namespace AdbFileManager {
 
         private async void dataGridView1_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e) {
             Console.WriteLine("CellMouseDoubleClick()");
-            if (e.RowIndex >= 0) {
+            if (browserReady && e.RowIndex >= 0) {
                 string name = dataGridView_soubory.Rows[e.RowIndex].Cells[1].Value.ToString();
                 string size = dataGridView_soubory.Rows[e.RowIndex].Cells[2].Value.ToString();
                 string date = dataGridView_soubory.Rows[e.RowIndex].Cells[3].Value.ToString();
@@ -204,7 +196,7 @@ namespace AdbFileManager {
                                 temp_folder_created = true;
                             }
                             try {
-                                var arguments = AdbClient.TargetArguments(new[] { "pull", sourcePath, destinationPath }, selectedDevice?.adbId);
+                                var arguments = AdbClient.TargetArguments(new[] { "pull", sourcePath, destinationPath }, listedDevice);
                                 await AdbClient.Default.CopyAsync(arguments, null, CancellationToken.None);
                                 Process.Start(new ProcessStartInfo(destinationPath) { UseShellExecute = true });
                             }
@@ -222,6 +214,7 @@ namespace AdbFileManager {
             }
         }
         private async void android2pc_Click(object sender, EventArgs e) {
+            if (!browserReady) return;
             string? destination = explorerBrowser1.NavigationLog.CurrentLocation?.ParsingName;
             if (string.IsNullOrWhiteSpace(destination)) return;
             var sources = new List<(string Source, bool IsDirectory)>();
@@ -261,6 +254,7 @@ namespace AdbFileManager {
             }
         }
         void clickedFolder() {
+            if (!browserReady) return;
             int rowIndex = dataGridView_soubory.CurrentCell?.RowIndex ?? -1;
             if (rowIndex < 0 || dataGridView_soubory.Rows[rowIndex].IsNewRow) return;
             var row = dataGridView_soubory.Rows[rowIndex];
@@ -276,12 +270,13 @@ namespace AdbFileManager {
         }
 
         private void NavigateToDirectory(string path) {
-            directoryPath = path;
-            cur_path_modifyInternal = true;
-            try { cur_path.Text = directoryPath; }
-            finally { cur_path_modifyInternal = false; }
-            dataGridView_soubory.DataSource = Functions.getDir(directoryPath,
-                SettingsManager.settings.useCompatibilityMode, SettingsManager.settings.useFastCompatibility);
+            if (string.IsNullOrEmpty(path) || !path.StartsWith('/') || path.Contains('\0')) {
+                MessageBox.Show(this, BrowserText("invalidPath"), strings.error);
+                return;
+            }
+            directoryPath = path.EndsWith('/') ? path : path + "/";
+            cur_path.Text = directoryPath;
+            _ = LoadAndroidDirectoryAsync(directoryPath);
         }
 
         void goUpDirectory() {
@@ -289,81 +284,24 @@ namespace AdbFileManager {
             if (parent != null) NavigateToDirectory(parent);
         }
 
-        public bool multipleDevicesDetection() {
-            if (foundDevices.Count > 1 && selectedDevice == null) {
-                Console.WriteLine("Multiple devices detected, showing message in datagridview");
-                Console.WriteLine("Found devices count: " + foundDevices.Count);
-                DataTable dt2 = dataGridView_soubory.DataSource as DataTable;
-                dt2.Rows.Clear();
-                string[] multipleText = AdbFileManager.strings.multipleDevicesError.Split("\\n");
-                dt2.Rows.Add(new Icon(@"icons\file.ico"), multipleText[0], 0, DateTime.UnixEpoch);
-                int datagridviewWidth = dataGridView_soubory.Columns[1].Width;
-
-                dataGridView_soubory.Columns[1].DefaultCellStyle.WrapMode = DataGridViewTriState.True;
-                dt2.Rows.Add(new Icon(@"icons\file.ico"), multipleText[1], 0, DateTime.UnixEpoch);
-
-                dataGridView_soubory.Rows[1].Height = 50;
-
-                return true;
-            }
-            else return false;
-        }
-        private void timer1_Tick(object sender, EventArgs e) {
-
-            Console.WriteLine("timer ticked");
-
+        private async void timer1_Tick(object sender, EventArgs e) {
             timer1.Stop();
             timer1.Enabled = false;
-
-            refreshDevicesList();
-
             hideConsole();
-
-            if (multipleDevicesDetection()) return;
-
-
-            DataTable dt = dataGridView_soubory.DataSource as DataTable;
-            dt.Rows.Add(new Icon(@"icons\file.ico"), AdbFileManager.strings.loadingFilesInRoot, 0, DateTime.UnixEpoch);
-
-
-            dataGridView_soubory.DataSource = Functions.getDir(directoryPath, SettingsManager.settings.useCompatibilityMode, SettingsManager.settings.useFastCompatibility);
-            dataGridView_soubory.Columns[1].Width = 307;
-            dataGridView_soubory.Columns[1].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-
-            cur_path_modifyInternal = true;
             cur_path.Text = directoryPath;
-            cur_path_modifyInternal = false;
-
-            button_pc2android.Invalidate();
-            button_android2pc.Invalidate();
-            verticalLabel_refresh.Invalidate();
-            button_unlock.Invalidate();
-            verticalLabel_makedir.Invalidate();
-
-            Form1_Resize(this, new EventArgs());
-
+            await LoadAndroidDirectoryAsync(directoryPath);
+            if (!IsDisposed) Form1_Resize(this, EventArgs.Empty);
         }
 
         private async void pc2android_Click(object sender, EventArgs e) {
+            if (!browserReady) return;
             var sources = explorerBrowser1.SelectedItems
                 .Select(item => (Source: item.ParsingName, IsDirectory: Directory.Exists(item.ParsingName))).ToList();
             await QueueTransfersAsync(sources, directoryPath, false);
         }
 
-        bool cur_path_modifyInternal = false;
         private void cur_path_TextChanged(object sender, EventArgs e) {
-            Console.WriteLine("cur_path_TextChanged();");
-            if (cur_path_modifyInternal) {
-                Console.WriteLine("cur_path_TextChanged false");
-                return;
-            }
-            if (!directoryPath.EndsWith("/")) {
-                Console.WriteLine("cur_path_TextChanged adding / to end of path");
-                directoryPath += "/";
-            }
-
-            directoryPath = cur_path.Text;
-            dataGridView_soubory.DataSource = Functions.getDir(directoryPath, SettingsManager.settings.useCompatibilityMode, SettingsManager.settings.useFastCompatibility);
+            // A typed path is submitted with Enter, rather than querying on every keystroke.
         }
 
         private void Form1_Load(object sender, EventArgs e) {
@@ -493,6 +431,7 @@ namespace AdbFileManager {
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e) {
+            browserRequests.Cancel();
             if (transferQueue?.IsRunning == true) {
                 e.Cancel = true;
                 closeAfterQueue = true;
@@ -689,7 +628,8 @@ namespace AdbFileManager {
             unlock.Show();
         }
 
-        private void button_makedir_Click(object sender, EventArgs e) {
+        private async void button_makedir_Click(object sender, EventArgs e) {
+            if (!browserReady) return;
             //show form dialog with textbox input for directory name
             Form directoryNameForm = new Form();
             directoryNameForm.Text = AdbFileManager.strings.enterDirectoryName;
@@ -712,9 +652,19 @@ namespace AdbFileManager {
             DialogResult result = directoryNameForm.ShowDialog();
             if (result == DialogResult.OK) {
                 string directoryName = dirName.Text;
-                string output = adb("shell", "mkdir " + AdbClient.QuoteShell(TransferCommand.RemotePath(directoryPath, directoryName)));
-                Console.WriteLine(output);
-                dataGridView_soubory.DataSource = Functions.getDir(directoryPath, SettingsManager.settings.useCompatibilityMode, SettingsManager.settings.useFastCompatibility);
+                if (string.IsNullOrEmpty(directoryName) || directoryName.Contains('/') || directoryName is "." or "..") return;
+                string targetPath = directoryPath;
+                string? targetDevice = listedDevice;
+                try {
+                    await AdbClient.Default.QueryAsync(new[] { "shell", "mkdir " + AdbClient.QuoteShell(
+                        TransferCommand.RemotePath(targetPath, directoryName)) }, targetDevice);
+                    if (!IsDisposed && directoryPath == targetPath && listedDevice == targetDevice)
+                        await LoadAndroidDirectoryAsync(targetPath);
+                }
+                catch (Exception ex) {
+                    if (!IsDisposed) MessageBox.Show(this, ex.Message, strings.error);
+                }
+
             }
         }
 
@@ -731,112 +681,33 @@ namespace AdbFileManager {
             settingsForm.ShowDialog(this);
         }
 
-        private void comboBox_device_SelectedIndexChanged(object sender, EventArgs e) {
-            if (modifyingComboBox) return; //prevent infinite loop when refreshing devices list
-            if (comboBox_device.SelectedIndex == 1) { //Wireless option
-                                                      //open dialog WirelessPair
-                WirelessPair wirelessPair = new WirelessPair();
-                DialogResult result = wirelessPair.ShowDialog(this);
-                comboBox_device.SelectedIndex = 0; //reset to default device
-                refreshDevicesList(); //refresh the list of devices
+        private async void comboBox_device_SelectedIndexChanged(object sender, EventArgs e) {
+            if (modifyingComboBox) return;
+            if (comboBox_device.SelectedIndex == 1) {
+                using var wirelessPair = new WirelessPair();
+                wirelessPair.ShowDialog(this);
+                selectedDevice = null;
             }
-            if (comboBox_device.SelectedIndex >= 2) {
-                int deviceIndex = comboBox_device.SelectedIndex - 2; //first two is default and wireless so we can just - 2
-                if (deviceIndex < foundDevices.Count) {
-                    selectedDevice = foundDevices[deviceIndex];
-                    Console.WriteLine($"Selected device: {selectedDevice.model} ({selectedDevice.adbId})");
-                    //set the selected device in adb
-                    //string command = $"adb -s {selectedDevice.adbId} shell";
-                    //Console.WriteLine(command);
-                    //adb(command);
-                }
-                else {
-                    Console.WriteLine("Selected device index out of range");
-                }
+            else if (comboBox_device.SelectedIndex >= 2) {
+                int index = comboBox_device.SelectedIndex - 2;
+                if (index >= foundDevices.Count) return;
+                selectedDevice = foundDevices[index];
             }
-            else {
-                selectedDevice = null; //reset to default device
-            }
+            else selectedDevice = null;
+            await LoadAndroidDirectoryAsync(directoryPath);
         }
-        public static Device? selectedDevice = null; //null = default
-        public List<Device> foundDevices = new List<Device>();
+
+        public static Device? selectedDevice = null;
+        public List<Device> foundDevices = new();
         public class Device {
-            public string adbId { get; set; }
-            public string state { get; set; }
-            public string product { get; set; }
-            public string model { get; set; }
-            public string device { get; set; }
-            public string transportId { get; set; }
+            public string adbId { get; set; } = "";
+            public string state { get; set; } = "";
+            public string product { get; set; } = "";
+            public string model { get; set; } = "";
+            public string device { get; set; } = "";
+            public string transportId { get; set; } = "";
         }
-        bool modifyingComboBox = false; //to prevent infinite loop when refreshing devices list
-        public void refreshDevicesList() {
-            Console.WriteLine("Refreshing devices list...");
-            string output = adb("devices", "-l");
-            Console.WriteLine(output);
-            string[] lines = output.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
-            lines = lines.Skip(1).Where(line => !string.IsNullOrWhiteSpace(line)).ToArray();
-
-            modifyingComboBox = true;
-            comboBox_device.Items.Clear();
-            comboBox_device.Items.Add(AdbFileManager.strings.defaultDevice);
-            comboBox_device.Items.Add(AdbFileManager.strings.addWireless);
-            foundDevices.Clear();
-            var ipPattern = new Regex(@"^\s*(\d{1,3}\.){3}\d{1,3}:\d{1,5}");
-
-            foreach (var line in lines) {
-                // adb-REDACTED._adb-tls-connect._tcp device product:EU_AI2302 model:ASUS_AI2302 device:ASUS_AI2302 transport_id:1
-                var device = new Device();
-
-                var parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                if (parts.Length < 2) continue;
-
-                device.adbId = parts[0];
-                device.state = parts[1];
-
-                for (int i = 2; i < parts.Length; i++) {
-                    var kv = parts[i].Split(':', 2);
-                    if (kv.Length == 2) {
-                        switch (kv[0]) {
-                            case "product":
-                                device.product = kv[1];
-                                break;
-                            case "model":
-                                device.model = kv[1];
-                                break;
-                            case "device":
-                                device.device = kv[1];
-                                break;
-                            case "transport_id":
-                                device.transportId = kv[1];
-                                break;
-                        }
-                    }
-                }
-                string neautorizovano = device.state == "unauthorized" ? " (UNAUTHORIZED)" : "";
-                string offline = device.state == "offline" ? AdbFileManager.strings.offline : "";
-                string bezdrat = device.adbId.Contains("tcp") || ipPattern.IsMatch(device.adbId) ? AdbFileManager.strings.wireless : "";
-                comboBox_device.Items.Add($"{device.model ?? device.adbId}" + neautorizovano + bezdrat + offline);
-                foundDevices.Add(device);
-            }
-            comboBox_device.DropDownWidth = Math.Max(200, comboBox_device.Items.Cast<string>().Max(item => TextRenderer.MeasureText(item, comboBox_device.Font).Width) + 20);
-
-            if (selectedDevice != null) {
-                int index = foundDevices.FindIndex(d => d.adbId == selectedDevice.adbId);
-                if (index >= 0) {
-                    comboBox_device.SelectedIndex = index + 2; // +2 because first two items are default and wireless
-                }
-                else {
-                    comboBox_device.SelectedIndex = 0; //reset to default device
-                }
-            }
-            else {
-                comboBox_device.SelectedIndex = 0; //reset to default device
-            }
-            Application.DoEvents();
-
-
-            modifyingComboBox = false;
-        }
+        bool modifyingComboBox;
 
         int selectChangedCount = 0;
 
@@ -894,135 +765,6 @@ namespace AdbFileManager {
 			if(old_android) return legacyAndroid.isFolder(file, fastcompatibility);
 			if(file.permissions.ToLower().Trim()[0] == 'd') return true; //the first character of the line is 'd' if it's a directory
 			else return false;
-		}
-		static bool lastRefreshSetTextWidth = false;
-		public static DataTable getDir(string directoryPath, bool old_android, bool old_android_fast) {
-			if(lastRefreshSetTextWidth){
-				Form1._Form1.dataGridView_soubory.Columns[0].Width = 25;
-				Form1._Form1.dataGridView_soubory.Columns[1].Width = 307;
-				Form1._Form1.dataGridView_soubory.Columns[2].Width = 80;
-				Form1._Form1.dataGridView_soubory.Columns[3].Width = 115;
-				Form1._Form1.dataGridView_soubory.Columns[4].Width = 90;
-
-			}
-			if(old_android) {
-				fastcompatibility = old_android_fast;
-				legacyAndroid.fastcompatibility = old_android_fast;
-				return legacyAndroid.getDir(directoryPath);
-			}
-			Cursor.Current = Cursors.WaitCursor;
-
-			// Retrieve a list of files in the specified directory
-
-			string output = Form1.adb("shell", "ls -lL " + AdbClient.QuoteShell(directoryPath));
-			string[] lines = output.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
-
-			string filteredOutput = string.Join(Environment.NewLine, lines);
-			Console.WriteLine(filteredOutput);
-
-            if (filteredOutput.Contains("ls: Unknown option '-L'.")) {
-                var result = MessageBox.Show(AdbFileManager.strings.lsLLNotSupportedMessage, AdbFileManager.strings.lsLLNotSupportedMessageTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-
-			List<string[]> fileList = new List<string[]>();
-			try {
-				string[] files = filteredOutput.ToString().Split('\n');
-				var dgv = new DataTable();
-
-				dgv.Columns.Add("ico", typeof(Icon));
-				/*dgv.Columns.Add("Name");
-				dgv.Columns.Add("Size (KiB)", typeof(decimal));
-				dgv.Columns.Add("Date", typeof(DateTime));
-				dgv.Columns.Add("Attr");*/
-				dgv.Columns.Add(Form1.rm.GetString("datagridview_name"));
-				dgv.Columns.Add(Form1.rm.GetString("datagridview_size"), typeof(decimal));
-				dgv.Columns.Add(Form1.rm.GetString("datagridview_date"), typeof(DateTime));
-				dgv.Columns.Add(Form1.rm.GetString("datagridview_attr"));
-
-				foreach(string filee in files.Skip(1)) {
-					string file = filee.Trim();
-					try {
-						if(!string.IsNullOrWhiteSpace(file)) {
-							/* line examples
-							"drwx------ 9 u0_a201  u0_a201     8192 2023-06-17 13:26 Music"
-							 "-rw------- 1 u0_a201  u0_a201  1331648 2021-11-22 00:42 SpaceCadetPinball.cia"
-							 "-rw------- 1 u0_a201  u0_a201  1365560 2021-01-19 04:14 Not\ Funny,\ Didn't\ HahahÃ¦.webm"*/
-							string[] attributes = CustomSplit(file, ' ');
-
-							string permissions = attributes[0];
-							int links = int.Parse(attributes[1]);
-							string owner = attributes[2];
-							string group = attributes[3];
-							decimal size = decimal.Round(decimal.Parse(attributes[4]) / 1024, 3);
-
-							DateTime date = DateTime.Parse(attributes[5] + " " + attributes[6]);
-							string name = string.Join(' ', attributes.Skip(7));
-							Icon icon;
-							try {
-								icon = UIStyle.GetIcon(file, isFolder(permissions, old_android));
-							}
-							catch(Exception ex) {
-								ConsoleColor old = Console.ForegroundColor;
-								Console.ForegroundColor = ConsoleColor.Magenta;
-								Console.WriteLine("Catched exception while parsing file icon: ");
-								Console.WriteLine(ex.ToString());
-								Console.ForegroundColor = old;
-								//use generic system icon
-								icon = null;
-
-							}
-							//dgv.Rows.Add(permissions, links, owner, group, size, date, name);
-							dgv.Rows.Add(icon, name, size, date, permissions);
-						}
-					}
-					catch(Exception ex) {
-						ConsoleColor old = Console.ForegroundColor;
-						Console.ForegroundColor = ConsoleColor.Red;
-						Console.WriteLine("Exception occurred while parsing file list: ");
-						Console.WriteLine(ex.ToString());
-						Console.ForegroundColor = old;
-					}
-				}
-				if(dgv.Rows.Count == 0) {
-					dgv.Rows.Add(new Icon(@"icons\file.ico"), AdbFileManager.strings.noFilesFound, 0, DateTime.UnixEpoch);
-					if(directoryPath == "/sdcard/") {
-						string[] instructionLines = AdbFileManager.strings.usbDebugEnableInstructions.Split("\\n");
-						foreach(string line in instructionLines) {
-							dgv.Rows.Add(new Icon(@"icons\file.ico"), line, 0, DateTime.UnixEpoch);
-						}
-
-						//set column widths other than column 1 to 0, so they are not visible
-						lastRefreshSetTextWidth = true;
-						Form1._Form1.dataGridView_soubory.Columns[0].Width = 16; //icon column
-						Form1._Form1.dataGridView_soubory.Columns[1].Width = 999; //icon column
-						Form1._Form1.dataGridView_soubory.Columns[2].Width = 0; //size column
-						Form1._Form1.dataGridView_soubory.Columns[3].Width = 0; //date column
-						Form1._Form1.dataGridView_soubory.Columns[4].Width = 0; //permissions column
-
-					}
-				}
-				else if(dgv.Rows.Count > 18) {
-					Form1._Form1.dataGridView_soubory.Columns[1].Width = 290;
-				}
-				else Form1._Form1.dataGridView_soubory.Columns[1].Width = 307;
-
-				Cursor.Current = Cursors.Default;
-				return dgv;
-			}
-			catch(Exception ex) {
-				var dgv = new DataTable();
-				dgv.Columns.Add("ico", typeof(Icon));
-				dgv.Columns.Add(Form1.rm.GetString("datagridview_name"));
-				dgv.Columns.Add(Form1.rm.GetString("datagridview_size"), typeof(decimal));
-				dgv.Columns.Add(Form1.rm.GetString("datagridview_date"), typeof(DateTime));
-				dgv.Rows.Add(new Icon(@"icons\file.ico"), AdbFileManager.strings.noDeviceFound, 0, DateTime.UnixEpoch);
-				dgv.Rows.Add(new Icon(@"icons\file.ico"), ex, 0, DateTime.UnixEpoch);
-
-
-				Cursor.Current = Cursors.Default;
-				return dgv;
-
-			}
 		}
 		public static string[] CustomSplit(string text, char delimiter) {
 			string[] result = Regex.Split(text, $"(?<!\\\\){delimiter}+");

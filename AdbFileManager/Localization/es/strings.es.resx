@@ -394,4 +394,16 @@ Esta herramienta puede intentar desbloquear el teléfono para que pueda hacer un
   <data name="queue_storageError" xml:space="preserve"><value>No se pudo guardar o recuperar la cola: </value></data>
   <data name="queue_restored" xml:space="preserve"><value>Se recuperaron las transferencias guardadas. Abre Transferencias para continuar o reintentar.</value></data>
   <data name="queue_adbError" xml:space="preserve"><value>ADB no disponible</value></data>
+  <data name="browser_loading" xml:space="preserve"><value>Cargando archivos de Android…</value></data>
+  <data name="browser_compatibilityHint" xml:space="preserve"><value>El modo de compatibilidad ahora consulta el tipo real de cada archivo de forma asíncrona. Ya no se deduce el tipo por la extensión.</value></data>
+  <data name="browser_status" xml:space="preserve"><value>Estado del explorador de archivos de Android</value></data>
+  <data name="browser_empty" xml:space="preserve"><value>Esta carpeta está vacía.</value></data>
+  <data name="browser_noDevice" xml:space="preserve"><value>No hay un dispositivo Android conectado. Conecta el teléfono, activa la depuración USB y pulsa Actualizar.</value></data>
+  <data name="browser_disconnected" xml:space="preserve"><value>El dispositivo seleccionado está desconectado. Reconéctalo o selecciona otro dispositivo.</value></data>
+  <data name="browser_chooseDevice" xml:space="preserve"><value>Hay varios dispositivos conectados. Selecciona uno para explorar sus archivos.</value></data>
+  <data name="browser_unauthorized" xml:space="preserve"><value>Dispositivo sin autorizar. Acepta la solicitud de depuración USB en el teléfono y pulsa Actualizar.</value></data>
+  <data name="browser_offline" xml:space="preserve"><value>El dispositivo no está listo para explorar archivos. Revisa la conexión y pulsa Actualizar.</value></data>
+  <data name="browser_readError" xml:space="preserve"><value>No se pudo leer esta carpeta. Revisa la conexión, la ruta y los permisos.</value></data>
+  <data name="browser_formatError" xml:space="preserve"><value>No se pudo interpretar el listado de Android. Prueba el modo de compatibilidad en Configuración.</value></data>
+  <data name="browser_invalidPath" xml:space="preserve"><value>Escribe una ruta absoluta de Android que empiece con / y pulsa Enter.</value></data>
 </root>

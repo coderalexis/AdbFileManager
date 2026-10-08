@@ -35,6 +35,9 @@ public sealed class PhysicalDeviceTests {
         try {
             Assert.Equal("device", (await client.QueryAsync(new[] { "get-state" }, serial)).Trim());
             await client.QueryAsync(new[] { "shell", $"mkdir -p {AdbClient.QuoteShell(remoteRoot)}" }, serial);
+            var browser = new AndroidBrowser(client);
+            Assert.Empty(await browser.ListAsync(remoteRoot, serial, false, default));
+            output.WriteLine("PASS asynchronous listing of an empty directory");
 
             string originalFile = Path.Combine(localRoot, "original", "payload teléfono.bin");
             Directory.CreateDirectory(Path.GetDirectoryName(originalFile)!);
@@ -54,6 +57,12 @@ public sealed class PhysicalDeviceTests {
                 $"sha256sum {AdbClient.QuoteShell(remoteFile)}" }, serial)).Split(' ', StringSplitOptions.RemoveEmptyEntries)[0];
             Assert.Equal(originalHash, deviceHash, ignoreCase: true);
             output.WriteLine($"PASS push 1 MiB Unicode filename: {originalHash}");
+            var listedFile = Assert.Single(await browser.ListAsync(remoteRoot, serial, false, default));
+            Assert.Equal("payload teléfono.bin", listedFile.Name);
+            Assert.Equal(originalBytes.Length, listedFile.Bytes);
+            Assert.False(listedFile.IsDirectory);
+            Assert.NotNull(listedFile.Modified);
+            output.WriteLine("PASS asynchronous listing preserves first file, Unicode name and metadata");
 
             string firstPull = Path.Combine(localRoot, "first-pull", "payload teléfono.bin");
             await backend.CopyAsync(new TransferJob {

@@ -402,4 +402,16 @@ Please enable Compatibility mode in settings, and then click Refresh.</value>
   <data name="queue_storageError" xml:space="preserve"><value>The queue could not be saved or restored: </value></data>
   <data name="queue_restored" xml:space="preserve"><value>Saved transfers restored. Open Transfers to continue or retry.</value></data>
   <data name="queue_adbError" xml:space="preserve"><value>ADB unavailable</value></data>
+  <data name="browser_loading" xml:space="preserve"><value>Loading Android files…</value></data>
+  <data name="browser_compatibilityHint" xml:space="preserve"><value>Compatibility mode now checks actual entry types asynchronously. Guessing types from file extensions is no longer used.</value></data>
+  <data name="browser_status" xml:space="preserve"><value>Android file browser status</value></data>
+  <data name="browser_empty" xml:space="preserve"><value>This folder is empty.</value></data>
+  <data name="browser_noDevice" xml:space="preserve"><value>No Android device connected. Connect a phone, enable USB debugging and press Refresh.</value></data>
+  <data name="browser_disconnected" xml:space="preserve"><value>The selected device is disconnected. Reconnect it or select another device.</value></data>
+  <data name="browser_chooseDevice" xml:space="preserve"><value>Multiple devices connected. Select a device to browse its files.</value></data>
+  <data name="browser_unauthorized" xml:space="preserve"><value>Device not authorized. Accept the USB debugging prompt on your phone and press Refresh.</value></data>
+  <data name="browser_offline" xml:space="preserve"><value>The device is not ready for file browsing. Check the connection and press Refresh.</value></data>
+  <data name="browser_readError" xml:space="preserve"><value>Could not read this folder. Check the connection, path and permissions.</value></data>
+  <data name="browser_formatError" xml:space="preserve"><value>Could not interpret the Android file listing. Try compatibility mode in Settings.</value></data>
+  <data name="browser_invalidPath" xml:space="preserve"><value>Enter an absolute Android path starting with / and press Enter.</value></data>
 </root>

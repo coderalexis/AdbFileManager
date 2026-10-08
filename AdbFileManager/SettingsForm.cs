@@ -50,6 +50,8 @@ namespace AdbFileManager {
             checkBox_useLegacyCopy.Enabled = false;
             checkBox_unwrapFolderLegacy.Enabled = false;
             checkBox_showTwoProgressBars.Enabled = false;
+            checkBox_fastCompatibility.Enabled = false;
+            toolTip1.SetToolTip(checkBox_fastCompatibility, strings.ResourceManager.GetString("browser_compatibilityHint"));
             toolTip1.SetToolTip(checkBox_useLegacyCopy, Transfers.QueueText.Get("hint"));
             loadingSettings = false;
             AppTheme.Apply(this);
