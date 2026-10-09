@@ -34,7 +34,7 @@ internal partial class MainForm
         return selectedFolder;
     }
 
-    private void OnLocalNavigationComplete(object sender, Microsoft.WindowsAPICodePack.Controls.NavigationCompleteEventArgs e)
+    private void OnLocalNavigationComplete(object? sender, Microsoft.WindowsAPICodePack.Controls.NavigationCompleteEventArgs e)
     {
         ApplyExplorerDarkMode();
         var location = localFilesBrowser.NavigationLog.CurrentLocation;
@@ -42,6 +42,7 @@ internal partial class MainForm
         if (currentPath == null)
             return;
         localPathTextBox.Text = currentPath;
+        UpdateCopyActions();
         _settings.Current.LastDirectory = currentPath;
         string? library = currentPath switch
         {
@@ -64,7 +65,7 @@ internal partial class MainForm
             localFilesBrowser.Navigate(folder);
     }
 
-    private void OnLocalPathKeyPress(object sender, KeyPressEventArgs e)
+    private void OnLocalPathKeyPress(object? sender, KeyPressEventArgs e)
     {
         if (e.KeyChar != '\r')
             return;

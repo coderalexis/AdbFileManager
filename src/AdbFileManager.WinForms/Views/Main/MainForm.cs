@@ -32,6 +32,7 @@ namespace AdbFileManager
             _preview = preview;
             _browser = new BrowserPresenter(browser, session, settings, this);
             InitializeComponent();
+            InitializeWorkspace();
             localFilesBrowser.HandleCreated += (_, _) => ApplyExplorerDarkMode();
             if (_theme.IsDark)
             {
@@ -39,38 +40,30 @@ namespace AdbFileManager
                 localFilesBrowser.NavigationOptions.PaneVisibility.CommandsOrganize = PaneVisibilityState.Hide;
                 localFilesBrowser.NavigationOptions.PaneVisibility.CommandsView = PaneVisibilityState.Hide;
             }
-            InitializeAppearance();
-            InitializeTransfers();
             InitializeBrowser();
+            InitializeTransfers();
+            InitializeAppearance();
             versionLabel.Text = Properties.Resources.CurrentCommit.Trim();
             FormClosed += (_, _) => _browser.Dispose();
         }
 
         private void InitializeAppearance()
         {
-            if (_settings.Current.ButtonStyle == 2)
-            {
-                foreach (var panel in new[] { deco_panel1, deco_panel2, deco_panel3, deco_panel5 })
-                    panel.Visible = false;
-                downloadButton.UseFluent = uploadButton.UseFluent = true;
-                refreshButton.UseFluent = createDirectoryButton.UseFluent = true;
-            }
             localBackButton.Image = _icons.GetNavigation("travel_enabled_back");
             localForwardButton.Image = _icons.GetNavigation("travel_enabled_forward");
-            consoleButton.Image = _icons.GetSmallImage("console");
             _theme.Apply(this);
         }
-        private async void OnRefreshClick(object sender, EventArgs e)
+        private async void OnRefreshClick(object? sender, EventArgs e)
         {
             await LoadAndroidDirectoryAsync(CurrentAndroidPath);
         }
 
-        private void OnVersionLinkClick(object sender, LinkLabelLinkClickedEventArgs e)
+        private void OnVersionLinkClick(object? sender, LinkLabelLinkClickedEventArgs e)
         {
             Process.Start(new ProcessStartInfo("https://github.com/coderalexis/AdbFileManager") { UseShellExecute = true });
         }
         private bool consoleShown;
-        private void OnConsoleToggle(object sender, EventArgs e)
+        private void OnConsoleToggle(object? sender, EventArgs e)
         {
             consoleShown = !consoleShown;
             if (consoleShown)
@@ -78,7 +71,7 @@ namespace AdbFileManager
             else
                 ConsoleWindow.Hide();
         }
-        private void OnMainClosing(object sender, FormClosingEventArgs e)
+        private void OnMainClosing(object? sender, FormClosingEventArgs e)
         {
             _browser.Cancel();
             if (transferQueue?.IsRunning == true)
@@ -108,7 +101,7 @@ namespace AdbFileManager
             // The ADB server is shared with other applications; leave it running.
         }
 
-        private void OnMainClosed(object sender, FormClosedEventArgs e)
+        private void OnMainClosed(object? sender, FormClosedEventArgs e)
         {
             Application.Exit();
             ConsoleWindow.Hide();

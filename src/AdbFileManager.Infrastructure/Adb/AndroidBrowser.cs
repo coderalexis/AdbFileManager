@@ -15,6 +15,14 @@ namespace AdbFileManager.Infrastructure.Adb
         public async Task CreateDirectoryAsync(string path, string serial, CancellationToken token) =>
             await query(new[] { "shell", "mkdir " + AdbClient.QuoteShell(path) }, serial, token).ConfigureAwait(false);
 
+        public async Task<string?> FindExternalStorageAsync(string serial, CancellationToken token)
+        {
+            string output = await query(new[] { "shell", "for path in /storage/????-????; do if [ -d \"$path\" ] && [ -r \"$path\" ]; then printf '%s\\n' \"$path\"; break; fi; done; exit 0" }, serial, token).ConfigureAwait(false);
+            token.ThrowIfCancellationRequested();
+            string? path = output.Split('\n').Select(line => line.TrimEnd('\r')).FirstOrDefault(line => line.StartsWith("/storage/", StringComparison.Ordinal));
+            return path;
+        }
+
         public async Task<IReadOnlyList<AndroidFile>> ListAsync(string path, string serial,
             bool compatibility, CancellationToken token)
         {

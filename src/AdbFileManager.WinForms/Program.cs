@@ -5,7 +5,6 @@ internal static class Program
     [STAThread]
     private static void Main()
     {
-        Application.SetHighDpiMode(HighDpiMode.DpiUnawareGdiScaled);
         ApplicationConfiguration.Initialize();
         string profile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "tobiksoft", "AdbFileManager");
         var settings = new SettingsService(new SettingsStore(Path.Combine(profile, "settings.xml")));

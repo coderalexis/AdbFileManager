@@ -422,4 +422,66 @@ Please enable Compatibility mode in settings, and then click Refresh.</value>
   <data name="queue_average" xml:space="preserve"><value>Average</value></data>
   <data name="queue_measuring" xml:space="preserve"><value>ADB is copying…</value></data>
   <data name="queue_statisticsHint" xml:space="preserve"><value>Bytes and average speed are shown after a successful copy when ADB reports a transfer summary. Average speed uses the ADB process duration; elapsed time includes preparation and retries.</value></data>
+  <data name="ux_activeTransfer" xml:space="preserve"><value>Current transfer</value></data>
+  <data name="ux_android" xml:space="preserve"><value>Android</value></data>
+  <data name="ux_androidSelection" xml:space="preserve"><value>Selected Android files</value></data>
+  <data name="ux_breadcrumb" xml:space="preserve"><value>Android breadcrumb navigation</value></data>
+  <data name="ux_camera" xml:space="preserve"><value>DCIM</value></data>
+  <data name="ux_checkAgain" xml:space="preserve"><value>Check again</value></data>
+  <data name="ux_checking" xml:space="preserve"><value>Checking connection…</value></data>
+  <data name="ux_chooseLocal" xml:space="preserve"><value>Choose a destination folder on this PC.</value></data>
+  <data name="ux_clearFilter" xml:space="preserve"><value>Clear filter</value></data>
+  <data name="ux_close" xml:space="preserve"><value>Close</value></data>
+  <data name="ux_connected" xml:space="preserve"><value>Connected</value></data>
+  <data name="ux_copyDetails" xml:space="preserve"><value>Copy details</value></data>
+  <data name="ux_copyHint" xml:space="preserve"><value>Select files and choose a copy direction.</value></data>
+  <data name="ux_desktop" xml:space="preserve"><value>Desktop</value></data>
+  <data name="ux_details" xml:space="preserve"><value>View details</value></data>
+  <data name="ux_device" xml:space="preserve"><value>Device</value></data>
+  <data name="ux_download" xml:space="preserve"><value>Download to PC</value></data>
+  <data name="ux_downloads" xml:space="preserve"><value>Downloads</value></data>
+  <data name="ux_errorDetails" xml:space="preserve"><value>Error details</value></data>
+  <data name="ux_failed" xml:space="preserve"><value>A transfer failed. Retry it or open the details.</value></data>
+  <data name="ux_hideTransfers" xml:space="preserve"><value>Hide transfers</value></data>
+  <data name="ux_historyOnly" xml:space="preserve"><value>Removes entries from transfer history. Files on your PC and phone are not deleted.</value></data>
+  <data name="ux_localHint" xml:space="preserve"><value>Browse your PC and choose a copy destination.</value></data>
+  <data name="ux_localPath" xml:space="preserve"><value>PC folder path</value></data>
+  <data name="ux_localSelection" xml:space="preserve"><value>Selected PC files</value></data>
+  <data name="ux_newFolder" xml:space="preserve"><value>New folder</value></data>
+  <data name="ux_noActive" xml:space="preserve"><value>No transfer in progress</value></data>
+  <data name="ux_noMatches" xml:space="preserve"><value>No files match this filter.</value></data>
+  <data name="ux_noSd" xml:space="preserve"><value>No readable external storage was found. Check that the card is mounted and press Refresh.</value></data>
+  <data name="ux_path" xml:space="preserve"><value>Folder path · press Enter to open</value></data>
+  <data name="ux_paused" xml:space="preserve"><value>Queue paused</value></data>
+  <data name="ux_pc" xml:space="preserve"><value>This PC</value></data>
+  <data name="ux_previewDown" xml:space="preserve"><value>Download {0} items to:
+{1}</value></data>
+  <data name="ux_previewUp" xml:space="preserve"><value>Send {0} items to:
+{1}</value></data>
+  <data name="ux_progress" xml:space="preserve"><value>Transfer progress</value></data>
+  <data name="ux_refresh" xml:space="preserve"><value>Refresh</value></data>
+  <data name="ux_retry" xml:space="preserve"><value>Retry</value></data>
+  <data name="ux_sd" xml:space="preserve"><value>SD card</value></data>
+  <data name="ux_search" xml:space="preserve"><value>Filter this Android folder…</value></data>
+  <data name="ux_selected" xml:space="preserve"><value>{0} items selected</value></data>
+  <data name="ux_selectedFolders" xml:space="preserve"><value>{0} items · {1} folders · folder size not calculated</value></data>
+  <data name="ux_selectedSize" xml:space="preserve"><value>{0} items · {1:N2} MiB in selected files</value></data>
+  <data name="ux_selectionNone" xml:space="preserve"><value>No items selected</value></data>
+  <data name="ux_settings" xml:space="preserve"><value>Settings</value></data>
+  <data name="ux_showTransfers" xml:space="preserve"><value>Show transfers</value></data>
+  <data name="ux_title" xml:space="preserve"><value>ADB File Manager</value></data>
+  <data name="ux_transfers" xml:space="preserve"><value>Transfers</value></data>
+  <data name="ux_unlock" xml:space="preserve"><value>Unlock</value></data>
+  <data name="ux_up" xml:space="preserve"><value>Up</value></data>
+  <data name="ux_upload" xml:space="preserve"><value>Send to Android</value></data>
+  <data name="ux_attention" xml:space="preserve"><value>Check Android panel</value></data>
+  <data name="ux_back" xml:space="preserve"><value>Back</value></data>
+  <data name="ux_chooseDevice" xml:space="preserve"><value>Select a device</value></data>
+  <data name="ux_console" xml:space="preserve"><value>Show or hide ADB console</value></data>
+  <data name="ux_disconnected" xml:space="preserve"><value>Disconnected</value></data>
+  <data name="ux_forward" xml:space="preserve"><value>Forward</value></data>
+  <data name="ux_installApk" xml:space="preserve"><value>Install selected APK</value></data>
+  <data name="ux_offline" xml:space="preserve"><value>Offline</value></data>
+  <data name="ux_unauthorized" xml:space="preserve"><value>Authorization required</value></data>
+  <data name="ux_unifiedStyle" xml:space="preserve"><value>Buttons use a consistent, accessible design.</value></data>
 </root>

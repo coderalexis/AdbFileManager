@@ -14,6 +14,11 @@ public sealed class PresenterTests
     }
     private sealed class Browser : IAndroidBrowser
     {
+        public string? ExternalPath { get; set; } = "/storage/1234-ABCD/";
+        public Func<CancellationToken, Task<string?>>? ExternalLookup
+        {
+            get; set;
+        }
         public IReadOnlyList<AndroidDevice> Devices { get; set; } = new[] { new AndroidDevice("phone-A", DeviceState.Ready, "Test") };
         public Func<string, CancellationToken, Task<IReadOnlyList<AndroidFile>>>? List
         {
@@ -27,6 +32,7 @@ public sealed class PresenterTests
             Queries.Add((path, serial));
             return List?.Invoke(path, token) ?? Task.FromResult<IReadOnlyList<AndroidFile>>(Array.Empty<AndroidFile>());
         }
+        public Task<string?> FindExternalStorageAsync(string serial, CancellationToken token) => ExternalLookup?.Invoke(token) ?? Task.FromResult(ExternalPath);
         public Task CreateDirectoryAsync(string path, string serial, CancellationToken token)
         {
             Created.Add((path, serial));
@@ -73,6 +79,35 @@ public sealed class PresenterTests
         Assert.Equal(BrowserStatus.Empty, view.Status);
         Assert.Equal("phone-A", presenter.ReadySerial);
         Assert.True(presenter.IsReady);
+    }
+    [Fact]
+    public async Task MissingSdCardClearsReadinessAndRefreshRestoresCurrentFolder()
+    {
+        var browser = new Browser { ExternalPath = null };
+        var view = new View();
+        using var presenter = new BrowserPresenter(browser, new DeviceSession(), new SettingsService(new Store()), view);
+        await presenter.NavigateAsync("/sdcard/");
+        await presenter.NavigateToExternalStorageAsync();
+        Assert.Equal(BrowserStatus.NoExternalStorage, view.Status);
+        Assert.False(presenter.IsReady);
+        Assert.Equal("/sdcard/", presenter.CurrentPath);
+        await presenter.NavigateAsync(presenter.CurrentPath);
+        Assert.True(presenter.IsReady);
+    }
+    [Fact]
+    public async Task LateSdDiscoveryCannotReplaceNewerNavigation()
+    {
+        var pending = new TaskCompletionSource<string?>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var browser = new Browser { ExternalLookup = _ => pending.Task };
+        using var presenter = new BrowserPresenter(browser, new DeviceSession(), new SettingsService(new Store()), new View());
+        await presenter.NavigateAsync("/sdcard/");
+        Task discovery = presenter.NavigateToExternalStorageAsync();
+        await presenter.NavigateAsync("/sdcard/DCIM/");
+        pending.SetResult("/storage/1234-ABCD/");
+        await discovery;
+        Assert.Equal("/sdcard/DCIM/", presenter.CurrentPath);
+        Assert.Equal("phone-A", presenter.ReadySerial);
+        Assert.DoesNotContain(browser.Queries, query => query.Path.StartsWith("/storage/"));
     }
     [Theory]
     [InlineData(DeviceState.Unauthorized, BrowserStatus.Unauthorized)]

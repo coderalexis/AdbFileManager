@@ -63,6 +63,32 @@ public sealed class BrowserPresenter(IAndroidBrowser browser, DeviceSession sess
         ReadySerial = null;
         requests.Cancel();
     }
+    public async Task NavigateToExternalStorageAsync()
+    {
+        string? serial = ReadySerial;
+        if (serial == null)
+        {
+            view.ShowStatus(BrowserStatus.NoDevice);
+            return;
+        }
+        CancellationToken token = requests.Start();
+        ReadySerial = null;
+        view.ShowStatus(BrowserStatus.Loading);
+        try
+        {
+            string? path = await browser.FindExternalStorageAsync(serial, token);
+            if (!requests.IsCurrent(token))
+                return;
+            if (path == null)
+            {
+                view.ShowStatus(BrowserStatus.NoExternalStorage);
+                return;
+            }
+            await NavigateAsync(path);
+        }
+        catch (OperationCanceledException) when (token.IsCancellationRequested) { }
+        catch (Exception ex) { if (requests.IsCurrent(token)) view.ShowStatus(BrowserStatus.ReadError, ex.Message); }
+    }
     public async Task CreateDirectoryAsync(string name)
     {
         if (!IsReady || string.IsNullOrEmpty(name) || name.Contains('/') || name.Contains('\0') || name is "." or "..")

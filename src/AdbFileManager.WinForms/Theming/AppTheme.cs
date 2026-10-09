@@ -42,6 +42,12 @@ namespace AdbFileManager
             finally { form.ResumeLayout(true); }
         }
 
+        internal void ApplyToView(Control control)
+        {
+            if (IsDark)
+                ApplyControl(control);
+        }
+
         private void ApplyControl(Control control)
         {
             switch (control)
@@ -78,6 +84,9 @@ namespace AdbFileManager
                     combo.BackColor = SurfaceRaised;
                     combo.ForeColor = Text;
                     combo.FlatStyle = FlatStyle.Flat;
+                    combo.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+                    combo.DrawItem -= DrawComboItem;
+                    combo.DrawItem += DrawComboItem;
                     break;
                 case ListBox list:
                     list.BackColor = Surface;
@@ -108,6 +117,8 @@ namespace AdbFileManager
                     button.FlatAppearance.BorderColor = Border;
                     button.FlatAppearance.BorderSize = 1;
                     button.UseVisualStyleBackColor = false;
+                    button.Paint -= PaintDisabledButton;
+                    button.Paint += PaintDisabledButton;
                     break;
                 case LinkLabel linkLabel:
                     linkLabel.BackColor = Color.Transparent;
@@ -240,6 +251,30 @@ namespace AdbFileManager
                 e.PaintContent(e.CellBounds);
                 e.Handled = true;
             }
+        }
+
+        private static void DrawComboItem(object? sender, DrawItemEventArgs e)
+        {
+            if (sender is not ComboBox combo)
+                return;
+            bool selected = (e.State & DrawItemState.Selected) != 0;
+            using var background = new SolidBrush(selected ? Selection : SurfaceRaised);
+            e.Graphics.FillRectangle(background, e.Bounds);
+            string text = e.Index >= 0 ? combo.GetItemText(combo.Items[e.Index]) ?? string.Empty : combo.Text;
+            TextRenderer.DrawText(e.Graphics, text, combo.Font, e.Bounds, combo.Enabled ? Text : MutedText,
+                TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix);
+        }
+
+        private static void PaintDisabledButton(object? sender, PaintEventArgs e)
+        {
+            if (sender is not Button button || button.Enabled)
+                return;
+            using var background = new SolidBrush(SurfaceRaised);
+            using var border = new Pen(Border);
+            e.Graphics.FillRectangle(background, button.ClientRectangle);
+            e.Graphics.DrawRectangle(border, 0, 0, button.Width - 1, button.Height - 1);
+            TextRenderer.DrawText(e.Graphics, button.Text, button.Font, button.ClientRectangle, MutedText,
+                TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.WordBreak);
         }
 
         private static void StyleTabs(TabControl tabs)

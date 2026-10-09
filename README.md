@@ -16,7 +16,7 @@ This fork measured **37.63 MiB/s** from internal phone storage with a higher-spe
 See [`BENCHMARKS.md`](BENCHMARKS.md) for the test conditions and full statistics.
 
 **To use this app, you must have enabled USB Debugging in android developer settings.**        
-After enabling it, just go to the directory from where you want to copy from/where to copy, select the file(s) and hit the arrow to the correct copy direction       
+After enabling it, open the source and destination folders, select files and choose **Download to PC** or **Send to Android**.
 
 Note2: Its made in C# and Windows Forms. To put it on Linux/Mac I would completely have to rewrite it, so no Linux/Mac version
 
@@ -56,6 +56,18 @@ The portable package is a [self-contained .NET deployment](https://learn.microso
 Android navigation runs asynchronously. A new request cancels the previous one. Empty folders, disconnected or unauthorized devices, and listing errors have separate messages. The Android table is read only.
 
 If Android returns an unsupported listing format, enable compatibility mode. Its file-type checks use actual metadata rather than guessing from filename extensions.
+
+## Browsing and transfer workspace
+
+- **Android** and **This PC** have separate headers, paths and selection summaries. The toolbar shows the device and its connection state.
+- **Download to PC →** and **← Send to Android** describe the copy direction. The selection preview and button tooltips show the destination; copying is enabled only for a valid selection and destination.
+- Android has clickable path segments, an **Up** button and shortcuts to **DCIM**, **Downloads** and the first readable SD volume under `/storage/????-????`. If no card is accessible, the app explains how to check again.
+- The Android filter matches names immediately, without another ADB listing. Refresh retains surviving selections only within the same folder and device; filtered-out files cannot be copied accidentally.
+- Transfers appear in a collapsible panel in the main window, with progress, elapsed time, pause, cancel and retry controls. **View details** opens the full queue, statistics and error details.
+- Connection and listing problems offer **Check again** and, when available, **View details**. Clearing completed or cancelled entries removes history, without deleting files.
+- The workspace uses consistent buttons, English/Spanish text, accessible control names and monitor DPI scaling. `F5` refreshes Android, `Ctrl+F` focuses its filter, `Ctrl+L` focuses the active pane's path and `Alt+Up` opens its parent. `Esc` clears the focused filter.
+
+The old button-style and optional Android Back-button settings are retained in saved configuration for compatibility; the new workspace uses one consistent button design and always provides **Up**.
 
 ## Transfer statistics
 

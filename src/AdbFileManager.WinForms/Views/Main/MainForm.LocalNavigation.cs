@@ -4,7 +4,7 @@ namespace AdbFileManager
 {
     internal partial class MainForm
     {
-        private void OnLocalBrowserLoad(object sender, EventArgs e)
+        private void OnLocalBrowserLoad(object? sender, EventArgs e)
         {
             try
             {

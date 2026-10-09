@@ -10,7 +10,7 @@ namespace AdbFileManager
         private bool closeAfterQueue;
         private bool queueStorageWarning;
         private bool queueStorageDisabled;
-        private Button? queueButton;
+        private IntegratedTransfersControl transferDock = null!;
         private Label? adbVersionLabel;
 
         private void InitializeTransfers()
@@ -28,14 +28,12 @@ namespace AdbFileManager
                 Shown += (_, _) => MessageBox.Show(this, QueueText.Get("storageError") + ex.Message, QueueText.Get("title"));
             }
             transferQueue.Changed += SaveAndRefreshQueue;
-            queueButton = new Button { Left = 6, Top = 0, Width = 150, Height = 25, Text = QueueText.Get("title") };
-            queueButton.Click += (_, _) => ShowTransferQueue();
-            adbVersionLabel = new Label { Left = 165, Top = 5, Width = 290, Height = 20, AutoEllipsis = true, Text = "ADB …" };
-            footerPanel.Controls.Add(queueButton);
+            transferDock = new IntegratedTransfersControl(transferQueue, RunQueueAsync, ShowTransferQueue, _theme);
+            transferDockHolder.Controls.Add(transferDock);
+            transferDock.ExpansionChanged += () => transferDockHolder.PerformLayout();
+            adbVersionLabel = new Label { Dock = DockStyle.Left, Width = 290, AutoEllipsis = true, Text = "ADB …" };
             footerPanel.Controls.Add(adbVersionLabel);
-            queueButton.BringToFront();
             adbVersionLabel.BringToFront();
-            MinimumSize = new Size(930, 550);
             Shown += async (_, _) =>
             {
                 try
@@ -44,7 +42,7 @@ namespace AdbFileManager
                 }
                 catch (Exception ex) { adbVersionLabel.Text = QueueText.Get("adbError"); Console.Error.WriteLine(ex); }
                 if (transferQueue.Jobs.Any(j => j.State is TransferState.Pending or TransferState.Cancelled or TransferState.Failed))
-                    ShowTransferQueue(); // Restored work waits for an explicit Start/Retry.
+                    transferDock.SetExpanded(true); // Restored work waits for an explicit Start/Retry.
             };
             SaveAndRefreshQueue();
         }
@@ -53,8 +51,6 @@ namespace AdbFileManager
         {
             if (transferQueue == null)
                 return;
-            if (queueButton != null)
-                queueButton.Text = QueueText.Get("title") + $" ({transferQueue.Summary.Pending})";
             if (queueStorageDisabled)
                 return;
             try
@@ -84,7 +80,6 @@ namespace AdbFileManager
         private Task<ConflictDecision> ResolveConflictAsync(TransferJob job, EntryKind kind, CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
-            ShowTransferQueue();
             using var dialog = new ConflictDialog(job, kind, _theme);
             // Closing the application while the dialog is open cancels its current operation too.
             dialog.Shown += (_, _) => { if (token.IsCancellationRequested) dialog.Close(); };
@@ -99,7 +94,7 @@ namespace AdbFileManager
                     catch (InvalidOperationException) { }
                 }
             });
-            dialog.ShowDialog(queueWindow);
+            dialog.ShowDialog(queueWindow is { Visible: true } ? queueWindow : this);
             token.ThrowIfCancellationRequested();
             return Task.FromResult(dialog.Decision);
         }
@@ -147,7 +142,7 @@ namespace AdbFileManager
                 var jobs = TransferBatchFactory.Create(sources.Select(source => new TransferSource(source.Source, source.IsDirectory)),
                     destinationDirectory, selectedSerial, fromAndroid, preserve);
                 transferQueue!.Enqueue(jobs);
-                ShowTransferQueue();
+                transferDock.SetExpanded(true);
                 if (!transferQueue.IsPaused)
                     _ = RunQueueAsync();
             }

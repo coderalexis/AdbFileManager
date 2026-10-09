@@ -2,36 +2,37 @@ namespace AdbFileManager
 {
     internal partial class MainForm
     {
-        private void OnUnlockClick(object sender, EventArgs e)
+        private void OnUnlockClick(object? sender, EventArgs e)
         {
             var unlock = new UnlockForm(_adb, _session, _theme);
             unlock.Show(this);
         }
-        private async void OnCreateDirectoryClick(object sender, EventArgs e)
+        private async void OnCreateDirectoryClick(object? sender, EventArgs e)
         {
             if (!IsBrowserReady)
                 return;
-            //show form dialog with textbox input for directory name
-            Form directoryNameForm = new Form();
-            directoryNameForm.Text = AdbFileManager.strings.enterDirectoryName;
-            directoryNameForm.Size = new Size(300, 100);
-            directoryNameForm.StartPosition = FormStartPosition.CenterParent;
-            TextBox dirName = new TextBox();
-            dirName.Size = new Size(260, 20);
-            dirName.Location = new Point(10, 10);
-            Button okButton = new Button();
-            okButton.Text = AdbFileManager.strings.ok;
-            okButton.Size = new Size(75, 23);
-            directoryNameForm.Controls.Add(dirName);
-            directoryNameForm.Controls.Add(okButton);
-
-            //set ok button to close the form and return the value from textbox
-            okButton.Click += (sender, e) =>
+            using var directoryNameForm = new Form
             {
-                directoryNameForm.DialogResult = DialogResult.OK;
-                directoryNameForm.Close();
+                Text = strings.enterDirectoryName,
+                StartPosition = FormStartPosition.CenterParent,
+                FormBorderStyle = FormBorderStyle.FixedDialog,
+                MinimizeBox = false,
+                MaximizeBox = false,
+                AutoScaleMode = AutoScaleMode.Dpi,
+                Font = Font,
+                ClientSize = new Size(420, 125)
             };
-            DialogResult result = directoryNameForm.ShowDialog();
+            var layout = new TableLayoutPanel { Dock = DockStyle.Fill, Padding = new Padding(12), ColumnCount = 1, RowCount = 2 };
+            layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+            layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            var dirName = new TextBox { Dock = DockStyle.Top, AccessibleName = strings.enterDirectoryName };
+            var okButton = new Button { Text = strings.ok, AutoSize = true, DialogResult = DialogResult.OK };
+            layout.Controls.Add(dirName, 0, 0);
+            layout.Controls.Add(okButton, 0, 1);
+            directoryNameForm.Controls.Add(layout);
+            directoryNameForm.AcceptButton = okButton;
+            _theme.Apply(directoryNameForm);
+            DialogResult result = directoryNameForm.ShowDialog(this);
             if (result == DialogResult.OK)
             {
                 string directoryName = dirName.Text;
@@ -50,13 +51,13 @@ namespace AdbFileManager
 
 
 
-        private void OnSettingsClick(object sender, EventArgs e)
+        private void OnSettingsClick(object? sender, EventArgs e)
         {
             using var settingsForm = new SettingsForm(_settings, _adb, _theme);
             settingsForm.ShowDialog(this);
         }
 
-        private async void OnDeviceSelectionChanged(object sender, EventArgs e)
+        private async void OnDeviceSelectionChanged(object? sender, EventArgs e)
         {
             if (updatingDeviceList)
                 return;
@@ -81,24 +82,28 @@ namespace AdbFileManager
         private bool updatingDeviceList;
 
         bool hideApkInstallPanel = false;
-        private void OnLocalSelectionChanged(object sender, EventArgs e)
+        private void OnLocalSelectionChanged(object? sender, EventArgs e)
         {
             var selected = localFilesBrowser.SelectedItems?.FirstOrDefault();
             if (selected != null)
             {
                 if (selected.Name?.EndsWith(".apk", StringComparison.OrdinalIgnoreCase) == true && !hideApkInstallPanel)
                 {
-                    apkAssistantPanel.Left = 28;
+                    apkAssistantPanel.Visible = true;
                 }
-                else if (apkAssistantPanel.Left != 10000)
+                else
                 {
-                    apkAssistantPanel.Left = 10000;
+                    apkAssistantPanel.Visible = false;
                 }
             }
+            else
+                apkAssistantPanel.Visible = false;
+            localSelectionActive = selected != null;
+            UpdateCopyActions();
         }
 
         bool installWizardDisplayed = false;
-        private void OnInstallApkClick(object sender, EventArgs e)
+        private void OnInstallApkClick(object? sender, EventArgs e)
         {
             string? path = localFilesBrowser.SelectedItems?.FirstOrDefault()?.ParsingName;
             if (!installWizardDisplayed && path != null)
@@ -109,9 +114,9 @@ namespace AdbFileManager
                 installWizardDisplayed = false;
             }
         }
-        private void OnDismissApkClick(object sender, EventArgs e)
+        private void OnDismissApkClick(object? sender, EventArgs e)
         {
-            apkAssistantPanel.Left = 10000;
+            apkAssistantPanel.Visible = false;
             hideApkInstallPanel = true;
 
         }

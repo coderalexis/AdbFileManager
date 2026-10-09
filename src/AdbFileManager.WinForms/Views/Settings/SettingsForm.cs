@@ -185,7 +185,9 @@ namespace AdbFileManager
             iconStyleLabel.Text = AdbFileManager.strings.settings_iconStyle;
             aeroIconsRadio.Text = AdbFileManager.strings.settings_windowsAero;
             windows11IconsRadio.Text = AdbFileManager.strings.settings_windows11;
-            buttonStyleLabel.Text = AdbFileManager.strings.settings_buttonDesign;
+            buttonStylePanel.Visible = false;
+            buttonStyleLabel.Text = UserInterfaceText.Get("unifiedStyle");
+            buttonStyleLabel.MaximumSize = new Size(370, 0);
             shadedButtonsRadio.Text = AdbFileManager.strings.settings_flatShaded;
             flatButtonsRadio.Text = AdbFileManager.strings.settings_flat;
             fluentButtonsRadio.Text = AdbFileManager.strings.settings_fluentGradient;
@@ -194,6 +196,7 @@ namespace AdbFileManager
             settingsSaveHint.Text = LocalizationText.Get("settings_saveHint") ?? "Changes are saved when this window closes.";
             buttonSaveAndClose.Text = LocalizationText.Get("settings_saveAndClose") ?? "Save and close";
             showBackButtonCheckBox.Text = AdbFileManager.strings.settings_showBackButton;
+            showBackButtonCheckBox.Visible = false; // Up is always available in the navigation bar.
         }
 
         private void checkBox_compatibilityMode_CheckedChanged(object sender, EventArgs e)

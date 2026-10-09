@@ -22,6 +22,7 @@ namespace AdbFileManager.Views.Transfers
         private readonly Label activity = new() { Dock = DockStyle.Fill, AutoEllipsis = true, TextAlign = ContentAlignment.MiddleLeft };
         private readonly ProgressBar activityProgress = new() { Dock = DockStyle.Bottom, Height = 6, MarqueeAnimationSpeed = 30 };
         private readonly System.Windows.Forms.Timer statisticsTimer = new() { Interval = 500 };
+        private readonly ToolTip buttonHints = new();
         internal bool AllowClose
         {
             get; set;
@@ -89,6 +90,7 @@ namespace AdbFileManager.Views.Transfers
             Disposed += (_, _) =>
             {
                 statisticsTimer.Dispose();
+                buttonHints.Dispose();
                 queue.Changed -= RefreshQueue;
                 queue.ProgressChanged -= RefreshProgress;
             };
@@ -98,6 +100,8 @@ namespace AdbFileManager.Views.Transfers
         private void AddButton(FlowLayoutPanel panel, string key, Func<Task> action)
         {
             var button = new Button { Name = key, Text = QueueText.Get(key), AutoSize = true, Height = 30 };
+            if (key is "clear" or "clearCancelled")
+                buttonHints.SetToolTip(button, UserInterfaceText.Get("historyOnly"));
             button.Click += async (_, _) =>
             {
                 try

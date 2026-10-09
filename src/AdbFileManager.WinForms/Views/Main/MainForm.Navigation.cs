@@ -3,7 +3,7 @@ namespace AdbFileManager
 {
     internal partial class MainForm
     {
-        private async void OnAndroidFileDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
+        private async void OnAndroidFileDoubleClick(object? sender, DataGridViewCellMouseEventArgs e)
         {
             if (!IsBrowserReady || e.RowIndex < 0)
                 return;
@@ -30,7 +30,7 @@ namespace AdbFileManager
             catch (Exception ex) { if (!IsDisposed) MessageBox.Show(this, ex.Message, strings.error); }
         }
 
-        private async void OnDownloadClick(object sender, EventArgs e)
+        private async void OnDownloadClick(object? sender, EventArgs e)
         {
             if (!IsBrowserReady)
                 return;
@@ -41,16 +41,16 @@ namespace AdbFileManager
                 .Select(file => (Source: AndroidPath.Combine(CurrentAndroidPath, file.Name), IsDirectory: file.IsDirectory)).ToList();
             await QueueTransfersAsync(sources, destination, true);
         }
-        private void OnAndroidHeaderDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
+        private void OnAndroidHeaderDoubleClick(object? sender, DataGridViewCellMouseEventArgs e)
         {
             NavigateToParent();
         }
-        private void OnParentDirectoryClick(object sender, EventArgs e)
+        private void OnParentDirectoryClick(object? sender, EventArgs e)
         {
             NavigateToParent();
         }
 
-        private void OnAndroidGridKeyDown(object sender, KeyEventArgs e)
+        private void OnAndroidGridKeyDown(object? sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
             {
@@ -59,19 +59,13 @@ namespace AdbFileManager
             }
             else if (e.KeyCode == Keys.Back)
             {
+                e.SuppressKeyPress = true;
                 NavigateToParent();
             }
         }
-        private void OnLocalBrowserKeyDown(object sender, PreviewKeyDownEventArgs e)
+        private void OnLocalBrowserKeyDown(object? sender, PreviewKeyDownEventArgs e)
         {
-            if (e.KeyCode == Keys.Enter)
-            {
-                localFilesBrowser.Navigate(localFilesBrowser.NavigationLog.CurrentLocation);
-            }
-            else if (e.KeyCode == Keys.Back)
-            {
-                NavigateToParent();
-            }
+            // The embedded PC Explorer owns Enter/Backspace; they must not navigate Android.
         }
         private void OpenSelectedAndroidEntry()
         {
@@ -96,7 +90,7 @@ namespace AdbFileManager
                 NavigateToDirectory(parent);
         }
 
-        private async void OnInitialLoad(object sender, EventArgs e)
+        private async void OnInitialLoad(object? sender, EventArgs e)
         {
             initialLoadTimer.Stop();
             initialLoadTimer.Enabled = false;
@@ -107,7 +101,7 @@ namespace AdbFileManager
                 OnMainResize(this, EventArgs.Empty);
         }
 
-        private async void OnUploadClick(object sender, EventArgs e)
+        private async void OnUploadClick(object? sender, EventArgs e)
         {
             if (!IsBrowserReady)
                 return;
@@ -117,7 +111,7 @@ namespace AdbFileManager
         }
 
 
-        private void OnMainLoad(object sender, EventArgs e)
+        private void OnMainLoad(object? sender, EventArgs e)
         {
             initialLoadTimer.Enabled = true;
             initialLoadTimer.Start();

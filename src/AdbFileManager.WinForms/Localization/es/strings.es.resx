@@ -414,4 +414,66 @@ Esta herramienta puede intentar desbloquear el teléfono para que pueda hacer un
   <data name="queue_average" xml:space="preserve"><value>Media</value></data>
   <data name="queue_measuring" xml:space="preserve"><value>ADB está copiando…</value></data>
   <data name="queue_statisticsHint" xml:space="preserve"><value>Los bytes y la velocidad media se muestran después de una copia exitosa cuando ADB informa el resumen. La media usa la duración del proceso ADB; el tiempo transcurrido incluye preparación y reintentos.</value></data>
+  <data name="ux_activeTransfer" xml:space="preserve"><value>Transferencia actual</value></data>
+  <data name="ux_android" xml:space="preserve"><value>Android</value></data>
+  <data name="ux_androidSelection" xml:space="preserve"><value>Archivos Android seleccionados</value></data>
+  <data name="ux_breadcrumb" xml:space="preserve"><value>Navegación por segmentos de la ruta Android</value></data>
+  <data name="ux_camera" xml:space="preserve"><value>DCIM</value></data>
+  <data name="ux_checkAgain" xml:space="preserve"><value>Volver a comprobar</value></data>
+  <data name="ux_checking" xml:space="preserve"><value>Comprobando conexión…</value></data>
+  <data name="ux_chooseLocal" xml:space="preserve"><value>Elige una carpeta de destino en este equipo.</value></data>
+  <data name="ux_clearFilter" xml:space="preserve"><value>Quitar filtro</value></data>
+  <data name="ux_close" xml:space="preserve"><value>Cerrar</value></data>
+  <data name="ux_connected" xml:space="preserve"><value>Conectado</value></data>
+  <data name="ux_copyDetails" xml:space="preserve"><value>Copiar detalles</value></data>
+  <data name="ux_copyHint" xml:space="preserve"><value>Selecciona archivos y elige la dirección de copia.</value></data>
+  <data name="ux_desktop" xml:space="preserve"><value>Escritorio</value></data>
+  <data name="ux_details" xml:space="preserve"><value>Ver detalles</value></data>
+  <data name="ux_device" xml:space="preserve"><value>Dispositivo</value></data>
+  <data name="ux_download" xml:space="preserve"><value>Descargar al PC</value></data>
+  <data name="ux_downloads" xml:space="preserve"><value>Descargas</value></data>
+  <data name="ux_errorDetails" xml:space="preserve"><value>Detalles del error</value></data>
+  <data name="ux_failed" xml:space="preserve"><value>Una transferencia falló. Reinténtala o abre los detalles.</value></data>
+  <data name="ux_hideTransfers" xml:space="preserve"><value>Ocultar transferencias</value></data>
+  <data name="ux_historyOnly" xml:space="preserve"><value>Elimina entradas del historial. No borra archivos del PC ni del teléfono.</value></data>
+  <data name="ux_localHint" xml:space="preserve"><value>Explora el PC y elige un destino para la copia.</value></data>
+  <data name="ux_localPath" xml:space="preserve"><value>Ruta de la carpeta del PC</value></data>
+  <data name="ux_localSelection" xml:space="preserve"><value>Archivos del PC seleccionados</value></data>
+  <data name="ux_newFolder" xml:space="preserve"><value>Nueva carpeta</value></data>
+  <data name="ux_noActive" xml:space="preserve"><value>Sin transferencias en curso</value></data>
+  <data name="ux_noMatches" xml:space="preserve"><value>No hay archivos que coincidan con el filtro.</value></data>
+  <data name="ux_noSd" xml:space="preserve"><value>No se encontró almacenamiento externo accesible. Comprueba que la tarjeta esté montada y pulsa Actualizar.</value></data>
+  <data name="ux_path" xml:space="preserve"><value>Ruta de la carpeta · pulsa Enter para abrir</value></data>
+  <data name="ux_paused" xml:space="preserve"><value>Cola pausada</value></data>
+  <data name="ux_pc" xml:space="preserve"><value>Este equipo</value></data>
+  <data name="ux_previewDown" xml:space="preserve"><value>Descargar {0} elementos a:
+{1}</value></data>
+  <data name="ux_previewUp" xml:space="preserve"><value>Enviar {0} elementos a:
+{1}</value></data>
+  <data name="ux_progress" xml:space="preserve"><value>Progreso de transferencia</value></data>
+  <data name="ux_refresh" xml:space="preserve"><value>Actualizar</value></data>
+  <data name="ux_retry" xml:space="preserve"><value>Reintentar</value></data>
+  <data name="ux_sd" xml:space="preserve"><value>Tarjeta SD</value></data>
+  <data name="ux_search" xml:space="preserve"><value>Filtrar esta carpeta de Android…</value></data>
+  <data name="ux_selected" xml:space="preserve"><value>{0} elementos seleccionados</value></data>
+  <data name="ux_selectedFolders" xml:space="preserve"><value>{0} elementos · {1} carpetas · tamaño de carpetas sin calcular</value></data>
+  <data name="ux_selectedSize" xml:space="preserve"><value>{0} elementos · {1:N2} MiB en archivos seleccionados</value></data>
+  <data name="ux_selectionNone" xml:space="preserve"><value>Sin elementos seleccionados</value></data>
+  <data name="ux_settings" xml:space="preserve"><value>Configuración</value></data>
+  <data name="ux_showTransfers" xml:space="preserve"><value>Mostrar transferencias</value></data>
+  <data name="ux_title" xml:space="preserve"><value>ADB File Manager</value></data>
+  <data name="ux_transfers" xml:space="preserve"><value>Transferencias</value></data>
+  <data name="ux_unlock" xml:space="preserve"><value>Desbloquear</value></data>
+  <data name="ux_up" xml:space="preserve"><value>Arriba</value></data>
+  <data name="ux_upload" xml:space="preserve"><value>Enviar a Android</value></data>
+  <data name="ux_attention" xml:space="preserve"><value>Revisa el panel Android</value></data>
+  <data name="ux_back" xml:space="preserve"><value>Atrás</value></data>
+  <data name="ux_chooseDevice" xml:space="preserve"><value>Selecciona un dispositivo</value></data>
+  <data name="ux_console" xml:space="preserve"><value>Mostrar u ocultar consola ADB</value></data>
+  <data name="ux_disconnected" xml:space="preserve"><value>Desconectado</value></data>
+  <data name="ux_forward" xml:space="preserve"><value>Adelante</value></data>
+  <data name="ux_installApk" xml:space="preserve"><value>Instalar APK seleccionado</value></data>
+  <data name="ux_offline" xml:space="preserve"><value>Sin conexión</value></data>
+  <data name="ux_unauthorized" xml:space="preserve"><value>Requiere autorización</value></data>
+  <data name="ux_unifiedStyle" xml:space="preserve"><value>Los botones usan un diseño uniforme y accesible.</value></data>
 </root>
