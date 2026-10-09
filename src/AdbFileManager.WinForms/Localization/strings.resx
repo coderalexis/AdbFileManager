@@ -381,6 +381,7 @@ Please enable Compatibility mode in settings, and then click Refresh.</value>
   <data name="queue_cancelCurrent" xml:space="preserve"><value>Cancel current</value></data>
   <data name="queue_retry" xml:space="preserve"><value>Retry failed / cancelled</value></data>
   <data name="queue_clear" xml:space="preserve"><value>Clear completed</value></data>
+  <data name="queue_clearCancelled" xml:space="preserve"><value>Clear cancelled</value></data>
   <data name="queue_export" xml:space="preserve"><value>Export summary</value></data>
   <data name="queue_file" xml:space="preserve"><value>Name</value></data>
   <data name="queue_direction" xml:space="preserve"><value>Direction</value></data>

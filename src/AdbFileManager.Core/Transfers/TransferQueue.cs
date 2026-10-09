@@ -67,6 +67,12 @@ namespace AdbFileManager.Core.Transfers
             Changed?.Invoke();
         }
 
+        public void ClearCancelled()
+        {
+            Jobs.RemoveAll(j => j.State == TransferState.Cancelled);
+            Changed?.Invoke();
+        }
+
         public async Task RunAsync()
         {
             if (IsRunning)

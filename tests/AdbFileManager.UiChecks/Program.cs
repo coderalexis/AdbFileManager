@@ -157,11 +157,20 @@ internal static class Program
                     ElapsedSeconds = 4,
                     StartedAt = DateTimeOffset.Now.AddSeconds(-4)
                 });
+                var cancelled = new TransferJob { DeviceId = "Test phone", Source = "/cancelled.mp4", Destination = @"C:\Backup\cancelled.mp4", State = TransferState.Cancelled };
+                var failed = new TransferJob { DeviceId = "Test phone", Source = "/failed.mp4", Destination = @"C:\Backup\failed.mp4", State = TransferState.Failed };
+                queue.Jobs.Add(cancelled);
+                queue.Jobs.Add(failed);
                 using var queueForm = new AdbFileManager.Views.Transfers.TransferQueueForm(queue, queue.RunAsync, theme);
                 queueForm.StartPosition = FormStartPosition.Manual;
                 queueForm.Location = new Point(-5000, -5000);
                 queueForm.Show();
+                var clearCancelled = (Button)queueForm.Controls.Find("clearCancelled", true).Single();
+                Check(clearCancelled.Text == "Limpiar cancelados", "Clear cancelled button is localized");
                 Render(queueForm, "queue-dark.png");
+                clearCancelled.PerformClick();
+                Check(!queue.Jobs.Contains(cancelled) && queue.Jobs.Contains(failed) && queue.Jobs.Any(job => job.State == TransferState.Completed),
+                    "Clear cancelled button removes only cancelled jobs");
                 queueForm.Hide();
                 Check(true, "Queue statistics render under unified theme");
                 Console.WriteLine("UI_CHECKS_PASSED");

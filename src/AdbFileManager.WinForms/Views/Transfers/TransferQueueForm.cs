@@ -53,6 +53,7 @@ namespace AdbFileManager.Views.Transfers
             AddButton(buttons, "cancelCurrent", () => { queue.CancelCurrent(); return Task.CompletedTask; });
             AddButton(buttons, "retry", async () => { queue.RetryFailed(); await run(); });
             AddButton(buttons, "clear", () => { queue.ClearFinished(); return Task.CompletedTask; });
+            AddButton(buttons, "clearCancelled", () => { queue.ClearCancelled(); return Task.CompletedTask; });
             AddButton(buttons, "export", ExportAsync);
             layout.Controls.Add(buttons, 0, 1);
             foreach (string key in new[] { "file", "direction", "device", "destination", "state", "attempts", "progress", "bytes", "elapsed", "average" })
@@ -96,7 +97,7 @@ namespace AdbFileManager.Views.Transfers
 
         private void AddButton(FlowLayoutPanel panel, string key, Func<Task> action)
         {
-            var button = new Button { Text = QueueText.Get(key), AutoSize = true, Height = 30 };
+            var button = new Button { Name = key, Text = QueueText.Get(key), AutoSize = true, Height = 30 };
             button.Click += async (_, _) =>
             {
                 try

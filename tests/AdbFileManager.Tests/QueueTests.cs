@@ -5,6 +5,26 @@ namespace AdbFileManager.Tests;
 
 public class QueueTests
 {
+    [Fact]
+    public void ClearCancelledPreservesEveryOtherStateAndNotifiesPersistence()
+    {
+        var queue = Queue(new Backend());
+        var jobs = Enum.GetValues<TransferState>().Select(state =>
+        {
+            var job = Job(state.ToString());
+            job.State = state;
+            return job;
+        }).ToArray();
+        queue.Jobs.AddRange(jobs);
+        int changes = 0;
+        queue.Changed += () => changes++;
+
+        queue.ClearCancelled();
+
+        Assert.Equal(jobs.Where(job => job.State != TransferState.Cancelled), queue.Jobs);
+        Assert.Equal(0, queue.Summary.Cancelled);
+        Assert.Equal(1, changes);
+    }
     private sealed class Backend : ITransferBackend
     {
         public Dictionary<string, EntryKind> Destinations { get; } = new();

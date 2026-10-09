@@ -373,6 +373,7 @@ Esta herramienta puede intentar desbloquear el teléfono para que pueda hacer un
   <data name="queue_cancelCurrent" xml:space="preserve"><value>Cancelar actual</value></data>
   <data name="queue_retry" xml:space="preserve"><value>Reintentar fallidos / cancelados</value></data>
   <data name="queue_clear" xml:space="preserve"><value>Limpiar completados</value></data>
+  <data name="queue_clearCancelled" xml:space="preserve"><value>Limpiar cancelados</value></data>
   <data name="queue_export" xml:space="preserve"><value>Exportar resumen</value></data>
   <data name="queue_file" xml:space="preserve"><value>Nombre</value></data>
   <data name="queue_direction" xml:space="preserve"><value>Dirección</value></data>
