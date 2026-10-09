@@ -6,6 +6,8 @@ En esta copia se instaló un SDK local en `.tools/dotnet`; no se incluye en Git 
 
 ## Ejecutar
 
+La solución contiene `src/AdbFileManager.Core`, `src/AdbFileManager.Infrastructure` y `src/AdbFileManager.WinForms`. El ejecutable sigue llamándose `AdbFileManager.exe`. Las responsabilidades y convenciones se describen en `ARCHITECTURE.md`.
+
 Con doble clic, abrir `Iniciar.cmd` en la raíz del repositorio. Compila Release x64 y utiliza el SDK local si está disponible.
 
 Desde PowerShell, en la raíz del repositorio:
@@ -30,7 +32,7 @@ Con un SDK disponible en PATH:
 
 ```powershell
 dotnet build AdbFileManager.sln --configuration Release
-dotnet build AdbFileManager/AdbFileManager.csproj --configuration Release -p:Platform=x64
+dotnet build src/AdbFileManager.WinForms/AdbFileManager.WinForms.csproj --configuration Release -p:Platform=x64
 dotnet test tests/AdbFileManager.Tests/AdbFileManager.Tests.csproj --configuration Release
 ```
 
@@ -70,7 +72,16 @@ Las pruebas ejecutan un simulador como proceso independiente. Cubren argumentos 
 - Los estados de carga, carpeta vacía, falta de dispositivo, autorización y error aparecen como mensajes separados de los archivos. Durante la carga o un error no se permite copiar desde un listado antiguo.
 - La tabla Android es de sólo lectura. Las transferencias capturan el dispositivo al que pertenece el listado mostrado, incluido cuando se utiliza la selección predeterminada.
 - El listado conserva la primera entrada aunque Android no escriba la cabecera `total`; las fechas y tamaños se interpretan con formato independiente de la configuración regional. Un formato desconocido se informa explícitamente.
-- El modo de compatibilidad consulta el tipo real de cada entrada de forma asíncrona. El antiguo modo rápido basado en extensiones queda deshabilitado para evitar confundir carpetas con puntos y archivos sin extensión.
+- El modo de compatibilidad consulta el tipo real de cada entrada de forma asíncrona. Las opciones heredadas sin uso se retiraron de la interfaz.
+
+## Comprobación de interfaz y formato
+
+```powershell
+.\scripts\ui-smoke.ps1
+dotnet format whitespace AdbFileManager.sln --verify-no-changes --no-restore
+```
+
+La comprobación de interfaz utiliza servicios simulados, no requiere teléfono y no guarda cambios en tu perfil. Verifica los recursos movidos, las traducciones, el listado de sólo lectura, la cancelación y los diálogos; genera capturas en `artifacts/ui-checks`.
 
 ## Límites y validación con un teléfono
 

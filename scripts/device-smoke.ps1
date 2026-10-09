@@ -2,7 +2,7 @@ param([string]$Serial)
 
 $ErrorActionPreference = "Stop"
 $repoRoot = Split-Path $PSScriptRoot -Parent
-$adbPath = Join-Path $repoRoot "AdbFileManager\adb.exe"
+$adbPath = Join-Path $repoRoot "src\AdbFileManager.WinForms\adb.exe"
 $dotnetPath = Join-Path $repoRoot ".tools\dotnet\dotnet.exe"
 if (-not (Test-Path $dotnetPath)) { $dotnetPath = "dotnet" }
 

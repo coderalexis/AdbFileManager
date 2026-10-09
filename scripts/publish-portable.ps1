@@ -9,11 +9,11 @@ $packageName = 'AdbFileManager-win-x64'
 # Each publish uses a new directory so stale DLLs cannot enter the package.
 $publishDirectory = Join-Path $OutputDirectory ($packageName + '-' + [Guid]::NewGuid().ToString('N').Substring(0, 8))
 New-Item -ItemType Directory -Path $publishDirectory -Force | Out-Null
-& $dotnetCommand publish (Join-Path $projectRoot 'AdbFileManager\AdbFileManager.csproj') `
+& $dotnetCommand publish (Join-Path $projectRoot 'src\AdbFileManager.WinForms\AdbFileManager.WinForms.csproj') `
     --configuration Release --runtime win-x64 --self-contained true -p:Platform=x64 `
     -p:PublishSingleFile=false -p:PublishTrimmed=false --output $publishDirectory --nologo
 if ($LASTEXITCODE -ne 0) { throw 'Portable publish failed.' }
-foreach ($requiredFile in 'AdbFileManager.exe', 'adb.exe', 'AdbWinApi.dll', 'AdbWinUsbApi.dll', 'coreclr.dll', 'hostpolicy.dll') {
+foreach ($requiredFile in 'AdbFileManager.exe', 'AdbFileManager.Core.dll', 'AdbFileManager.Infrastructure.dll', 'adb.exe', 'AdbWinApi.dll', 'AdbWinUsbApi.dll', 'coreclr.dll', 'hostpolicy.dll') {
     if (-not (Test-Path -LiteralPath (Join-Path $publishDirectory $requiredFile))) { throw "Missing portable dependency: $requiredFile" }
 }
 foreach ($iconDirectory in 'icons', 'iconsW11') {

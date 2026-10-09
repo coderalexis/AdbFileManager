@@ -1,24 +1,31 @@
 using System.Security.Cryptography;
-using AdbFileManager.Transfers;
+using AdbFileManager.Core.Transfers;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace AdbFileManager.Tests;
 
-public sealed class PhysicalDeviceFactAttribute : FactAttribute {
-    public PhysicalDeviceFactAttribute() {
+public sealed class PhysicalDeviceFactAttribute : FactAttribute
+{
+    public PhysicalDeviceFactAttribute()
+    {
         if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("AFM_DEVICE_SERIAL")))
             Skip = "Set AFM_DEVICE_SERIAL to run the physical Android device test.";
     }
 }
 
-public sealed class PhysicalDeviceTests {
+public sealed class PhysicalDeviceTests
+{
     private readonly ITestOutputHelper output;
-    public PhysicalDeviceTests(ITestOutputHelper output) { this.output = output; }
+    public PhysicalDeviceTests(ITestOutputHelper output)
+    {
+        this.output = output;
+    }
 
     [PhysicalDeviceFact]
     [Trait("Category", "PhysicalDevice")]
-    public async Task TransferBackendAndQueueRoundTripOnAndroidDevice() {
+    public async Task TransferBackendAndQueueRoundTripOnAndroidDevice()
+    {
         string serial = Environment.GetEnvironmentVariable("AFM_DEVICE_SERIAL")!;
         string adbPath = Environment.GetEnvironmentVariable("AFM_ADB_PATH") ?? FindBundledAdb();
         var client = new AdbClient(adbPath);
@@ -32,7 +39,8 @@ public sealed class PhysicalDeviceTests {
         output.WriteLine($"Model: {(await client.QueryAsync(new[] { "shell", "getprop ro.product.model" }, serial)).Trim()}");
         output.WriteLine($"Remote scratch directory: {remoteRoot}");
 
-        try {
+        try
+        {
             Assert.Equal("device", (await client.QueryAsync(new[] { "get-state" }, serial)).Trim());
             await client.QueryAsync(new[] { "shell", $"mkdir -p {AdbClient.QuoteShell(remoteRoot)}" }, serial);
             var browser = new AndroidBrowser(client);
@@ -47,10 +55,14 @@ public sealed class PhysicalDeviceTests {
             string originalHash = Hash(originalBytes);
             string remoteFile = remoteRoot + "/payload teléfono.bin";
 
-            await backend.CopyAsync(new TransferJob {
-                DeviceId = serial, Source = originalFile, Destination = remoteFile
+            await backend.CopyAsync(new TransferJob
+            {
+                DeviceId = serial,
+                Source = originalFile,
+                Destination = remoteFile
             }, remoteFile, false, progress, default);
-            Assert.Equal(EntryKind.File, await backend.InspectAsync(new TransferJob {
+            Assert.Equal(EntryKind.File, await backend.InspectAsync(new TransferJob
+            {
                 DeviceId = serial
             }, remoteFile, default));
             string deviceHash = (await client.QueryAsync(new[] { "shell",
@@ -65,8 +77,12 @@ public sealed class PhysicalDeviceTests {
             output.WriteLine("PASS asynchronous listing preserves first file, Unicode name and metadata");
 
             string firstPull = Path.Combine(localRoot, "first-pull", "payload teléfono.bin");
-            await backend.CopyAsync(new TransferJob {
-                DeviceId = serial, Source = remoteFile, Destination = firstPull, FromAndroid = true
+            await backend.CopyAsync(new TransferJob
+            {
+                DeviceId = serial,
+                Source = remoteFile,
+                Destination = firstPull,
+                FromAndroid = true
             }, firstPull, false, progress, default);
             Assert.Equal(originalHash, Hash(await File.ReadAllBytesAsync(firstPull)), ignoreCase: true);
             output.WriteLine("PASS pull round trip and SHA-256 comparison");
@@ -77,8 +93,11 @@ public sealed class PhysicalDeviceTests {
             new Random(67890).NextBytes(replacementBytes);
             await File.WriteAllBytesAsync(replacementFile, replacementBytes);
             string replacementHash = Hash(replacementBytes);
-            var replacementJob = new TransferJob {
-                DeviceId = serial, Source = replacementFile, Destination = remoteFile
+            var replacementJob = new TransferJob
+            {
+                DeviceId = serial,
+                Source = replacementFile,
+                Destination = remoteFile
             };
 
             await Assert.ThrowsAsync<IOException>(() =>
@@ -90,11 +109,18 @@ public sealed class PhysicalDeviceTests {
             Assert.Equal(replacementHash, await RemoteHash(client, serial, remoteFile), ignoreCase: true);
             output.WriteLine($"PASS explicit file replacement: {replacementHash}");
 
-            var keepBothJob = new TransferJob {
-                BatchId = Guid.NewGuid(), DeviceId = serial, Source = originalFile, Destination = remoteFile
+            var keepBothJob = new TransferJob
+            {
+                BatchId = Guid.NewGuid(),
+                DeviceId = serial,
+                Source = originalFile,
+                Destination = remoteFile
             };
             var queue = new TransferQueue(backend, (_, _, _) =>
-                Task.FromResult(new ConflictDecision(ConflictAction.KeepBoth))) { RetryDelay = TimeSpan.Zero };
+                Task.FromResult(new ConflictDecision(ConflictAction.KeepBoth)))
+            {
+                RetryDelay = TimeSpan.Zero
+            };
             queue.Enqueue(new[] { keepBothJob });
             await queue.RunAsync();
             Assert.Equal(TransferState.Completed, keepBothJob.State);
@@ -109,26 +135,39 @@ public sealed class PhysicalDeviceTests {
             await File.WriteAllTextAsync(Path.Combine(sourceDirectory, "nested", "README.txt"),
                 "AdbFileManager physical device smoke test");
             string remoteDirectory = remoteRoot + "/album test";
-            await backend.CopyAsync(new TransferJob {
-                DeviceId = serial, Source = sourceDirectory, Destination = remoteDirectory, IsDirectory = true
+            await backend.CopyAsync(new TransferJob
+            {
+                DeviceId = serial,
+                Source = sourceDirectory,
+                Destination = remoteDirectory,
+                IsDirectory = true
             }, remoteDirectory, false, progress, default);
             string pulledDirectory = Path.Combine(localRoot, "pulled album test");
-            await backend.CopyAsync(new TransferJob {
-                DeviceId = serial, Source = remoteDirectory, Destination = pulledDirectory,
-                FromAndroid = true, IsDirectory = true
+            await backend.CopyAsync(new TransferJob
+            {
+                DeviceId = serial,
+                Source = remoteDirectory,
+                Destination = pulledDirectory,
+                FromAndroid = true,
+                IsDirectory = true
             }, pulledDirectory, false, progress, default);
             Assert.Equal("AdbFileManager physical device smoke test",
                 await File.ReadAllTextAsync(Path.Combine(pulledDirectory, "nested", "README.txt")));
             output.WriteLine("PASS nested directory push/pull round trip");
             output.WriteLine("RESULT: ALL PHYSICAL DEVICE CHECKS PASSED");
         }
-        finally {
-            try {
+        finally
+        {
+            try
+            {
                 await client.QueryAsync(new[] { "shell", $"rm -rf {AdbClient.QuoteShell(remoteRoot)}" }, serial);
                 output.WriteLine("PASS remote scratch directory removed");
             }
             catch (Exception ex) { output.WriteLine("CLEANUP WARNING: " + ex.Message); }
-            try { Directory.Delete(localRoot, true); }
+            try
+            {
+                Directory.Delete(localRoot, true);
+            }
             catch (Exception ex) { output.WriteLine("LOCAL CLEANUP WARNING: " + ex.Message); }
         }
     }
@@ -141,11 +180,14 @@ public sealed class PhysicalDeviceTests {
 
     private static string Mask(string serial) => serial.Length <= 4 ? "****" : "…" + serial[^4..];
 
-    private static string FindBundledAdb() {
+    private static string FindBundledAdb()
+    {
         DirectoryInfo? directory = new(AppContext.BaseDirectory);
-        while (directory != null) {
-            string candidate = Path.Combine(directory.FullName, "AdbFileManager", "adb.exe");
-            if (File.Exists(candidate)) return candidate;
+        while (directory != null)
+        {
+            string candidate = Path.Combine(directory.FullName, "src", "AdbFileManager.WinForms", "adb.exe");
+            if (File.Exists(candidate))
+                return candidate;
             directory = directory.Parent;
         }
         throw new FileNotFoundException("Set AFM_ADB_PATH to the bundled adb.exe.");

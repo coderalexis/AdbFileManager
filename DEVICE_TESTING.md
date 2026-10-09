@@ -12,7 +12,7 @@ The device serial is masked in the evidence output. Do not capture notifications
 
 1. Connect a test phone and enable USB debugging.
 2. Accept the debugging authorization prompt on the phone.
-3. Confirm that `AdbFileManager/adb.exe devices -l` shows the device with state `device`.
+3. Confirm that `src/AdbFileManager.WinForms/adb.exe devices -l` shows the device with state `device`.
 4. From the repository root run:
 
 ```powershell

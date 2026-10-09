@@ -3,14 +3,16 @@ using Xunit;
 
 namespace AdbFileManager.Tests;
 
-public sealed class BrowserTests {
+public sealed class BrowserTests
+{
     private const string Listing = "drwxrwx--- 2 root everybody 4096 2026-09-22 10:46 Fotos.2026\n" +
         "-rw-rw---- 1 root everybody 1234 2026-10-08 14:02:03 teléfono  con espacios.bin\n";
 
     [Theory]
     [InlineData("")]
     [InlineData("total 8\n")]
-    public void FirstEntryIsPreservedWithOrWithoutTotalHeader(string header) {
+    public void FirstEntryIsPreservedWithOrWithoutTotalHeader(string header)
+    {
         var files = AndroidListingParser.Parse(header + Listing);
         Assert.Equal(2, files.Count);
         Assert.Equal("Fotos.2026", files[0].Name);
@@ -24,9 +26,11 @@ public sealed class BrowserTests {
     [InlineData("es-MX")]
     [InlineData("en-US")]
     [InlineData("ar-SA")]
-    public void DatesAndSizesDoNotDependOnSystemCulture(string culture) {
+    public void DatesAndSizesDoNotDependOnSystemCulture(string culture)
+    {
         var original = CultureInfo.CurrentCulture;
-        try {
+        try
+        {
             CultureInfo.CurrentCulture = new(culture);
             var file = AndroidListingParser.Parse(Listing)[1];
             Assert.Equal(new DateTime(2026, 10, 8, 14, 2, 3), file.Modified);
@@ -45,25 +49,29 @@ public sealed class BrowserTests {
     [InlineData("-rw-r--r-- 1 root root 20 invalid date README")]
     [InlineData("-rw-r--r-- 1 root root 20 2026-13-32 10:00 README")]
     public void MalformedListingIsReportedRatherThanPartiallyHidden(string line) =>
-        Assert.Throws<InvalidDataException>(() => AndroidListingParser.Parse(Listing + line));
+        Assert.Throws<BrowserException>(() => AndroidListingParser.Parse(Listing + line));
 
     [Fact]
-    public void DeviceParsingAcceptsTabsAndCrLfAndPreservesAuthorizationState() {
-        var devices = AndroidDevice.Parse("* daemon started successfully *\nList of devices attached\r\n" +
+    public void DeviceParsingAcceptsTabsAndCrLfAndPreservesAuthorizationState()
+    {
+        var devices = AndroidDeviceParser.Parse("* daemon started successfully *\nList of devices attached\r\n" +
             "abc\tdevice product:test model:SM_G780G transport_id:3\r\n" +
             "def\tunauthorized\r\nxyz offline\n");
         Assert.Equal(3, devices.Count);
         Assert.Equal("SM_G780G", devices[0].Model);
-        Assert.Equal("unauthorized", devices[1].State);
-        Assert.Equal("offline", devices[2].State);
+        Assert.Equal(DeviceState.Unauthorized, devices[1].State);
+        Assert.Equal(DeviceState.Offline, devices[2].State);
     }
 
     [Fact]
-    public async Task BrowserQueriesUseCapturedDeviceAndQuotedLiteralPath() {
+    public async Task BrowserQueriesUseCapturedDeviceAndQuotedLiteralPath()
+    {
         string[]? sent = null;
         string? target = null;
-        var browser = new AndroidBrowser((args, serial, _) => {
-            sent = args; target = serial;
+        var browser = new AndroidBrowser((args, serial, _) =>
+        {
+            sent = args;
+            target = serial;
             return Task.FromResult(Listing);
         });
         await browser.ListAsync("/sdcard/a'b & test/", "phone-A", false, default);
@@ -72,7 +80,8 @@ public sealed class BrowserTests {
     }
 
     [Fact]
-    public async Task CompatibilityUsesActualTypeForDottedDirectoriesAndExtensionlessFiles() {
+    public async Task CompatibilityUsesActualTypeForDottedDirectoriesAndExtensionlessFiles()
+    {
         var browser = new AndroidBrowser((args, _, _) => Task.FromResult(
             args[1].StartsWith("ls ") ? "Fotos.2026\nREADME\n" :
             args[1].Contains("Fotos.2026") ? "directory\n" : "file\n"));
@@ -84,14 +93,16 @@ public sealed class BrowserTests {
     }
 
     [Fact]
-    public async Task QueryFailureIsNotTurnedIntoAnEmptyFolder() {
+    public async Task QueryFailureIsNotTurnedIntoAnEmptyFolder()
+    {
         var browser = new AndroidBrowser((_, _, _) => Task.FromException<string>(
             new AdbCommandException(1, "Permission denied")));
         await Assert.ThrowsAsync<AdbCommandException>(() => browser.ListAsync("/data/", "phone", false, default));
     }
 
     [Fact]
-    public async Task LatestRequestCancelsQueryAndRejectsLateResult() {
+    public async Task LatestRequestCancelsQueryAndRejectsLateResult()
+    {
         using var requests = new LatestBrowserRequest();
         var completion = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
         CancellationToken observed = default;

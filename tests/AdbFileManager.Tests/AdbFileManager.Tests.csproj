@@ -13,18 +13,8 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <ProjectReference Include="..\FakeAdb\FakeAdb.csproj" />
-    <Compile Include="..\..\AdbFileManager\AdbProgressRunner.cs" Link="AdbProgressRunner.cs" />
-    <Compile Include="..\..\AdbFileManager\AdbClient.cs" Link="AdbClient.cs" />
-    <Compile Include="..\..\AdbFileManager\Transfers\TransferJob.cs" Link="TransferJob.cs" />
-    <Compile Include="..\..\AdbFileManager\Transfers\TransferQueue.cs" Link="TransferQueue.cs" />
-    <Compile Include="..\..\AdbFileManager\Transfers\QueueStore.cs" Link="QueueStore.cs" />
-    <Compile Include="..\..\AdbFileManager\Transfers\AdbTransferBackend.cs" Link="AdbTransferBackend.cs" />
-    <Compile Include="..\..\AdbFileManager\TransferCommand.cs" Link="TransferCommand.cs" />
-    <Compile Include="..\..\AdbFileManager\DirectoryEntry.cs" Link="DirectoryEntry.cs" />
-    <Compile Include="..\..\AdbFileManager\AndroidBrowser.cs" Link="AndroidBrowser.cs" />
-    <Compile Include="..\..\AdbFileManager\Settings.cs" Link="Settings.cs" />
-    <Compile Include="..\..\AdbFileManager\SettingsStore.cs" Link="SettingsStore.cs" />
-    <Compile Include="..\..\AdbFileManager\TransferStatistics.cs" Link="TransferStatistics.cs" />
+    <ProjectReference Include="..\..\src\AdbFileManager.Core\AdbFileManager.Core.csproj" />
+    <ProjectReference Include="..\..\src\AdbFileManager.Infrastructure\AdbFileManager.Infrastructure.csproj" />
   </ItemGroup>
   <Target Name="CopyFakeRuntimeConfig" AfterTargets="Build">
     <Copy SourceFiles="..\FakeAdb\bin\$(Configuration)\net8.0\FakeAdb.runtimeconfig.json" DestinationFolder="$(OutDir)" />

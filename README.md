@@ -4,6 +4,8 @@ This repository is a community fork of the original [AdbFileManager](https://git
 
 Many thanks to the original author for designing and publishing the C# Windows Forms application that made this fork possible. This edition keeps the original ADB file-manager foundation and builds on it with transfer reliability, a persistent queue, physical-device validation, performance measurements, and further usability improvements.
 
+The code is organized into **Core**, **Infrastructure** and **WinForms** projects under `src/`. See [ARCHITECTURE.md](ARCHITECTURE.md) for responsibilities, dependencies and the testing workflow.
+
 AdbFileManager is an alternative to MTP that uses the ADB protocol to copy files between Windows and Android. The original project reported approximately 41.6 MiB/s (332 Mib/s) over USB 2.0, compared with MTP at around 10 Mb/s.
 ![image](https://github.com/user-attachments/assets/c2571d20-c27c-4aa7-b450-5809223589ef)
 

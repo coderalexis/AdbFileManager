@@ -4,6 +4,15 @@
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
 # User-specific files
+# Extra Platform Tools copied locally; only the ADB runtime required by the application is bundled.
+/src/AdbFileManager.WinForms/etc1tool.exe
+/src/AdbFileManager.WinForms/fastboot.exe
+/src/AdbFileManager.WinForms/hprof-conv.exe
+/src/AdbFileManager.WinForms/make_f2fs.exe
+/src/AdbFileManager.WinForms/make_f2fs_casefold.exe
+/src/AdbFileManager.WinForms/mke2fs.conf
+/src/AdbFileManager.WinForms/mke2fs.exe
+/src/AdbFileManager.WinForms/sqlite3.exe
 *.rsuser
 *.suo
 *.user

@@ -3,24 +3,27 @@ using Xunit;
 
 namespace AdbFileManager.Tests;
 
-public sealed class SettingsTests : IDisposable {
+public sealed class SettingsTests : IDisposable
+{
     private readonly string root = Directory.CreateTempSubdirectory("afm-settings-").FullName;
     private string SettingsPath => Path.Combine(root, "settings.xml");
     public void Dispose() => Directory.Delete(root, true);
 
     [Fact]
-    public void AtomicSaveKeepsPreviousVersionAsBackup() {
+    public void AtomicSaveKeepsPreviousVersionAsBackup()
+    {
         var store = new SettingsStore(SettingsPath);
-        store.Save(new Settings { DarkMode = true, lang = 5 });
-        store.Save(new Settings { DarkMode = false, lang = 3 });
+        store.Save(new Settings { DarkMode = true, Language = 5 });
+        store.Save(new Settings { DarkMode = false, Language = 3 });
         Assert.False(store.Load().Value.DarkMode);
-        Assert.Equal((ushort)3, store.Load().Value.lang);
+        Assert.Equal((ushort)3, store.Load().Value.Language);
         Assert.True(new SettingsStore(SettingsPath + ".bak").Load().Value.DarkMode);
         Assert.Empty(Directory.GetFiles(root, "settings.xml.tmp-*"));
     }
 
     [Fact]
-    public void CorruptMainRestoresBackupAndPreservesDamagedBytes() {
+    public void CorruptMainRestoresBackupAndPreservesDamagedBytes()
+    {
         var store = new SettingsStore(SettingsPath);
         store.Save(new Settings { DarkMode = true });
         store.Save(new Settings { DarkMode = false });
@@ -35,17 +38,19 @@ public sealed class SettingsTests : IDisposable {
     }
 
     [Fact]
-    public void CorruptFileWithoutBackupUsesDefaultsWithoutFailingStartup() {
+    public void CorruptFileWithoutBackupUsesDefaultsWithoutFailingStartup()
+    {
         File.WriteAllText(SettingsPath, "not XML");
         var recovered = new SettingsStore(SettingsPath).Load();
         Assert.False(recovered.Value.DarkMode);
-        Assert.Equal(60, recovered.Value.progressWaitTimeMs);
+        Assert.Equal(60, recovered.Value.ProgressIntervalMs);
         Assert.NotNull(recovered.Warning);
         Assert.Single(Directory.GetFiles(root, "settings.xml.corrupt-*"));
     }
 
     [Fact]
-    public void AbandonedTemporaryFileDoesNotReplaceGoodSettings() {
+    public void AbandonedTemporaryFileDoesNotReplaceGoodSettings()
+    {
         var store = new SettingsStore(SettingsPath);
         store.Save(new Settings { DarkMode = true });
         File.WriteAllText(SettingsPath + ".tmp-abandoned", "half written XML");
@@ -54,7 +59,8 @@ public sealed class SettingsTests : IDisposable {
     }
 
     [Fact]
-    public void FailedReplacementLeavesExistingSettingsIntact() {
+    public void FailedReplacementLeavesExistingSettingsIntact()
+    {
         var store = new SettingsStore(SettingsPath);
         store.Save(new Settings { DarkMode = true });
         using (var locked = new FileStream(SettingsPath, FileMode.Open, FileAccess.Read, FileShare.None))
@@ -67,18 +73,37 @@ public sealed class SettingsTests : IDisposable {
     [InlineData(-1, 100, -100, 20)]
     [InlineData(10, 50, 99999, 520)]
     [InlineData(9, 8, 29, 20)]
-    public void InvalidSavedValuesAreNormalizedBeforeControlsLoad(int theme, ushort language, int interval, int expected) {
-        var original = new Settings { ButtonTheme = theme, lang = language, progressWaitTimeMs = interval };
-        using (var stream = File.Create(SettingsPath)) new XmlSerializer(typeof(Settings)).Serialize(stream, original);
+    public void InvalidSavedValuesAreNormalizedBeforeControlsLoad(int theme, ushort language, int interval, int expected)
+    {
+        var original = new Settings { ButtonStyle = theme, Language = language, ProgressIntervalMs = interval };
+        using (var stream = File.Create(SettingsPath))
+            new XmlSerializer(typeof(Settings)).Serialize(stream, original);
         var loaded = new SettingsStore(SettingsPath).Load().Value;
-        Assert.Equal(0, loaded.ButtonTheme);
-        Assert.Null(loaded.lang);
-        Assert.Equal(expected, loaded.progressWaitTimeMs);
+        Assert.Equal(0, loaded.ButtonStyle);
+        Assert.Null(loaded.Language);
+        Assert.Equal(expected, loaded.ProgressIntervalMs);
     }
 
     [Fact]
-    public void ExternalXmlEntitiesAreRejected() {
-        File.WriteAllText(SettingsPath, "<!DOCTYPE Settings [<!ENTITY external SYSTEM 'file:///missing-file'>]><Settings><lastDirectory>&external;</lastDirectory></Settings>");
+    public void ExternalXmlEntitiesAreRejected()
+    {
+        File.WriteAllText(SettingsPath, "<!DOCTYPE Settings [<!ENTITY external SYSTEM 'file:///missing-file'>]><Settings><LastDirectory>&external;</LastDirectory></Settings>");
         Assert.NotNull(new SettingsStore(SettingsPath).Load().Warning);
+    }
+    [Fact]
+    public void LegacyXmlNamesSurviveModelPropertyRenaming()
+    {
+        File.WriteAllText(SettingsPath, "<Settings><ButtonTheme>2</ButtonTheme><lang>5</lang><progressWaitTimeMs>90</progressWaitTimeMs><useCompatibilityMode>true</useCompatibilityMode><lastDirectory>C:\\Photos</lastDirectory><useLegacyCopy>true</useLegacyCopy></Settings>");
+        var store = new SettingsStore(SettingsPath);
+        var settings = store.Load().Value;
+        Assert.Equal(2, settings.ButtonStyle);
+        Assert.Equal((ushort)5, settings.Language);
+        Assert.Equal(90, settings.ProgressIntervalMs);
+        Assert.True(settings.UseCompatibilityMode);
+        Assert.Equal(@"C:\Photos", settings.LastDirectory);
+        store.Save(settings);
+        string saved = File.ReadAllText(SettingsPath);
+        Assert.Contains("<lang>5</lang>", saved);
+        Assert.Contains("<ButtonTheme>2</ButtonTheme>", saved);
     }
 }
